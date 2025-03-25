@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import * as THREE from "three";
 import RAPIER from '@dimforge/rapier3d-compat';
 import { World as  ThreeJsWorld} from '../threejs/World';
 import {RapierDebugRenderer} from './RapierDebugRenderer';
@@ -15,7 +14,7 @@ export class Rapier {
   // public dynamicBodies: [THREE.Object3D, RAPIER.RigidBody][] = [];
   public dynamicBodies: any[] = [];
 
-  private rapierDebugRenderer!: RapierDebugRenderer;
+  public rapierDebugRenderer!: RapierDebugRenderer;
   /**
    * 
    * @param args 
@@ -26,19 +25,24 @@ export class Rapier {
     // st hit = this.world.castRay(ray, 10, false); 
   }
 
-  public async initRapier(x: number, y: number, z: number) {
+  public async initRapier(x: number, y: number, z: number):Promise<Rapier> { // Promise<Rapier> 
 
     await RAPIER.init(); // This line is only needed if using the compat version
-    const gravity = new RAPIER.Vector3(x, y, z);
-    this.world = new RAPIER.World(gravity);
-
-    console.log('initRapier: this.world:', this.world);
-
-    this.rapierDebugRenderer = new RapierDebugRenderer(this.threeJsWorld.scene, this.world)
-
-    this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
+    this.removeAll();
+    
+    if(!this.world) {
+      const gravity = new RAPIER.Vector3(x, y, z);
+      this.world = new RAPIER.World(gravity);
+  
+      this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
+    }
+    return this;
   }
 
+  public enableRapierDebugRenderer() {
+    this.rapierDebugRenderer = new RapierDebugRenderer(this.threeJsWorld.scene, this.world)
+    return this;
+  }
 
   private update(clock: any) {
     const delta = clock.delta;
@@ -46,13 +50,21 @@ export class Rapier {
     this.world.step();
 
     for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
-      this.dynamicBodies[i].object3d.position.copy(this.dynamicBodies[i].rigidBody.translation())
-      this.dynamicBodies[i].object3d.quaternion.copy(this.dynamicBodies[i].rigidBody.rotation())
       this.dynamicBodies[i].update(clock.elapsedTime);
     }
 
-    this.rapierDebugRenderer.update();
+    if(this.rapierDebugRenderer && this.rapierDebugRenderer.enabled) {
+      this.rapierDebugRenderer.update();
+    }
 
+  }
+
+  private removeAll() {
+    for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
+      this.dynamicBodies[i].remove();
+    }
+
+    this.dynamicBodies = [];
   }
 }
 

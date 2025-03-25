@@ -1,13 +1,12 @@
 import * as THREE from "three";
 import {Material} from './Material';
 import {LoaderGLTF} from './LoaderGLTF';
+
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
   public geometry: any;
   public material: any;
-  constructor(args: any = {}) {
-    // this.create(args);
-  }
+  constructor() {}
 
   /**
    * 
@@ -15,24 +14,13 @@ export class Mesh {
    * @param geometry {type: sphereGeometry}
    * @param material 
    */
-  public async create(args: any) {
-
-
-  // const sphereGeometry = new THREE.SphereGeometry(0.3, 128, 128);
-    //   const meshStandardMaterial = new THREE.MeshStandardMaterial({  map: ballTexture, flatShading: true });
-    //   // const meshStandardMaterial = new THREE.MeshStandardMaterial({  flatShading: true });
-    //   this.bodyMesh = new THREE.Mesh( sphereGeometry, meshStandardMaterial);
-    //   this.bodyMesh.castShadow = true;
-    //   // sphereGeometry.scale(10, 10, 10); // 공이 안보여서 임시로
-    //   this.game.world.scene.add(this.bodyMesh);
-    //   this.bodyMesh.position.set(0, 1, 0);
-
+  public async create(args: any):Promise<THREE.Mesh> {
     this.createGeometry(args.geometry)
     const material = new Material();
     this.material = await material.createMaterial(args.material);
-    // this.createMaterial(args.material);
+
     this.mesh = this.createMesh(args.mesh || {});
-    return this.mesh;
+    return <THREE.Mesh>this.mesh;
   }
 
   public async loadGLTF(args: any) {
@@ -58,17 +46,7 @@ export class Mesh {
     }
   }
 
-  // private createMaterial(args: any) {
-  //   this.loadmap(args);
-  //   switch(args.type) {
-  //     case 'standard':
-  //       this.material = new THREE.MeshStandardMaterial({  map: args.map, flatShading: args.flatShading, color: args.color });
-  //       // if(args.color) this.material.setColor(args.color);
-  //       break;
-  //   }
-  // }
-
-  private createMesh(args: any) {
+  private createMesh(args: any):THREE.Mesh {
     const mesh = new THREE.Mesh( this.geometry, this.material);
     if(args.position) mesh.position.set(args.position.x, args.position.y, args.position.z);
     if(args.scale) mesh.scale.set(args.scale.x, args.scale.y, args.scale.z);

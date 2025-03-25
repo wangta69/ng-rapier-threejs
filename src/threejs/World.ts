@@ -1,15 +1,32 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import {Light,} from './lib/Light';
+
+interface CameraProps {
+  fov?: number, 
+  aspect?: number, 
+  near?: number, 
+  far?:number,
+  position?: number[]
+}
+
+interface ScreenProps {
+  width?: number,
+  height?: number
+}
+
+interface RendererProps {
+  antialias?: boolean, 
+  alpha?: boolean
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class World {
 
-  public game: any;
-  // public game:<T> ()= {} as T
-  
+ 
   private container: any;
   public scene = new THREE.Scene();
   private clock = new THREE.Clock();
@@ -17,120 +34,97 @@ export class World {
   public updates:any[] = [];
 
   private controls!:OrbitControls;
-  private controlsEnable = false;
+  private helpers!:THREE.GridHelper;
 
-  private renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+  public renderer!:THREE.WebGLRenderer; // = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
  
   public camera!:THREE.PerspectiveCamera; 
-  private lights: any;
   private screen = {width: 0, height: 0};
 
   constructor() {}
 
-  public create() {
+  public setContainer(container:HTMLElement) {
+    this.container = container;
+    return this;
+  }
 
-    this.container = document.getElementById('game');
-    this.setScrensize();
-    
-    this.createRenderer();
-
-  
-    this.createLights();
-    // this.setAxesHelper();
-    
-    // window.addEventListener( 'resize', () => this.onResize(), false );
-
-    this.createCamera();
-   
+  public enableControls(controlProps?:any) {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 
-
-    const helper = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
-    helper.position.y = -75;
-    this.scene.add( helper );
-
-    setTimeout(() => {
-      this.update();
-    }, 1000);
+    this.controls.enableDamping = controlProps?.damping || false; // an animation loop is required when either damping or auto-rotation are enabled
+    this.controls.target.z = controlProps?.target.x || 0;
+    this.controls.target.y = controlProps?.target.y || 0;
+    this.controls.target.z = controlProps?.target.z || 0;
+    return this;
   }
 
-  private setScrensize() {
-    this.screen = {width:  window.innerWidth, height: window.innerHeight};
+  public enableHelpers(helperProps?: any) {
+    this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
+    this.helpers.position.x = helperProps.position.x || 0;
+    this.helpers.position.y = helperProps.position.y || 0;
+    this.helpers.position.z = helperProps.position.z || 0;
+    this.scene.add( this.helpers );
+    return this;
   }
-  private createRenderer() {
+
+  public setScreen(screenProps?: ScreenProps) {
+
+    let {width, height} = screenProps || {width: window.innerWidth, height: window.innerWidth};
+
+    width = width || window.innerWidth;
+    height = height || window.innerWidth;
+
+    this.screen = {width, height};
+    return this;
+  }
+
+  public setRenderer(rendererProps: RendererProps) {
+    this.renderer = new THREE.WebGLRenderer( rendererProps );
+ 
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( this.screen.width, this.screen.height );
     this.container.appendChild( this.renderer.domElement );
+    return this;
   }
 
-  private createCamera() {
-    const fov = 25; // 현재값 : 25
-    const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.1; 
-    const far = 200; // 200
+  public setCamera(cameraProps:CameraProps) {
+    let {fov, aspect, near, far} = cameraProps;
+
+    console.log('cameraProp:', fov, aspect, near, far);
+    fov = fov || 25; // 현재값 : 25
+    aspect = aspect || window.innerWidth / window.innerHeight;
+    near = near || 0.1; 
+    far = far || 200; // 200
 
     this.camera = new THREE.PerspectiveCamera( fov, aspect, near, far )
-    this.camera.position.set( 0, 0, 100 ); // 0, 0, 200
+    cameraProps.position ? this.camera.position.set( cameraProps.position[0], cameraProps.position[1], cameraProps.position[2] ) : this.camera.position.set( 0, 0, 0 );
+
+    // this.camera.position.set( 0, 0, 100 ); // 0, 0, 200
+
+    return this;
   }
 
   public onResize() {
-    this.setScrensize();
-    this.renderer.setSize( this.screen.width, this.screen.height );
-  /*
-  
-      
-      this.camera.fov = this.fov;
-      this.camera.aspect = this.width / this.height;
-  
-      const aspect = this.stage.width / this.stage.height;
-      const fovRad = this.fov * THREE.MathUtils.DEG2RAD;
-  
-      let distance = ( aspect < this.camera.aspect )
-        ? ( this.stage.height / 2 ) / Math.tan( fovRad / 2 )
-        : ( this.stage.width / this.camera.aspect ) / ( 2 * Math.tan( fovRad / 2 ) );
-  
-      distance *= 0.5;
-  
-      this.camera.position.set( distance, distance, distance);
-      this.camera.lookAt( this.scene.position );
-      this.camera.updateProjectionMatrix();
-  
-      const docFontSize = ( aspect < this.camera.aspect )
-        ? ( this.height / 100 ) * aspect
-        : this.width / 100;
-  
-      document.documentElement.style.fontSize = docFontSize + 'px';
-  
-      */
-  
- 
-    }
+    this.setScreen();
+    this.renderer.setSize( this.screen.width, this.screen.height ); 
+  }
     
-    private createLights() {
-  
-      this.lights = {
-        holder:  new THREE.Object3D,
-        ambient: new THREE.AmbientLight( 0xffffff, 0.7),
-        front:   new THREE.DirectionalLight( 0xffffff, 3 ),
-        back:    new THREE.DirectionalLight( 0xffffff, 0.19 ),
-      };
-  
-      this.lights.front.position.set( 1.5, 5, 3 );
-      this.lights.back.position.set( -1.5, -5, -3 );
-  
-      this.lights.holder.add( this.lights.ambient );
-      this.lights.holder.add( this.lights.front );
-      this.lights.holder.add( this.lights.back );
-  
-      this.scene.add( this.lights.holder );
-  
-    }
+  public setLights(lightProps: any) {  
+    const light = new Light(lightProps);
+    this.scene.add(light.light);
+    return this;
+  }
+
+  public clear() {
+    this.scene.clear();
+    return this;
+  }
 
   public render() {
+
     const delta = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
-    if(this.controlsEnable) {
+    if(this.controls) {
       this.controls.update();
     }
 
@@ -141,11 +135,8 @@ export class World {
     this.renderer.render( this.scene, this.camera );
   }
 
-  private update = () => {
+  public update = () => {
     this.render();
     requestAnimationFrame(this.update); // request next update
   }
-
-
-
 }

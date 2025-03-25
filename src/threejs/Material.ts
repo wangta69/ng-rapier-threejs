@@ -17,6 +17,10 @@ export class Material {
     switch(args.type) {
       case 'standard':
         return new THREE.MeshStandardMaterial(params);   
+      case 'normal':
+        return new THREE.MeshNormalMaterial(params); 
+      case 'phong':
+        return new THREE.MeshPhongMaterial(params); 
     }
     return null;
       
