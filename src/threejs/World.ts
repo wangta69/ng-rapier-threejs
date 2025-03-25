@@ -21,6 +21,14 @@ interface RendererProps {
   alpha?: boolean
 }
 
+
+interface CameraProps {
+  fov: number, 
+  aspect: number, 
+  near: number, 
+  far:number
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -58,6 +66,7 @@ export class World {
     return this;
   }
 
+<<<<<<< HEAD
   public enableHelpers(helperProps?: any) {
     this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
     this.helpers.position.x = helperProps.position.x || 0;
@@ -66,6 +75,12 @@ export class World {
     this.scene.add( this.helpers );
     return this;
   }
+=======
+    this.createCamera(<CameraProps>{});
+   
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+>>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
 
   public setScreen(screenProps?: ScreenProps) {
 
@@ -78,19 +93,27 @@ export class World {
     return this;
   }
 
+<<<<<<< HEAD
   public setRenderer(rendererProps: RendererProps) {
     this.renderer = new THREE.WebGLRenderer( rendererProps );
  
+=======
+  private createRenderer() {
+>>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( this.screen.width, this.screen.height );
     this.container.appendChild( this.renderer.domElement );
     return this;
   }
 
+<<<<<<< HEAD
   public setCamera(cameraProps:CameraProps) {
     let {fov, aspect, near, far} = cameraProps;
 
     console.log('cameraProp:', fov, aspect, near, far);
+=======
+  private createCamera({fov, aspect, near, far}:CameraProps) {
+>>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
     fov = fov || 25; // 현재값 : 25
     aspect = aspect || window.innerWidth / window.innerHeight;
     near = near || 0.1; 

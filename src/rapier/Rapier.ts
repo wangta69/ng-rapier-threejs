@@ -50,7 +50,15 @@ export class Rapier {
     this.world.step();
 
     for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
+<<<<<<< HEAD
       this.dynamicBodies[i].update(clock.elapsedTime);
+=======
+      if(this.dynamicBodies[i].object3d) {
+        this.dynamicBodies[i].object3d.position.copy(this.dynamicBodies[i].rigidBody.translation())
+        this.dynamicBodies[i].object3d.quaternion.copy(this.dynamicBodies[i].rigidBody.rotation())
+        this.dynamicBodies[i].update(clock.elapsedTime);
+      }
+>>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
     }
 
     if(this.rapierDebugRenderer && this.rapierDebugRenderer.enabled) {
