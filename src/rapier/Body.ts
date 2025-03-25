@@ -40,44 +40,23 @@ export class Body {
     } else {
       props = colliderProps.fromParams(params);
     }
-<<<<<<< HEAD
 
 
     console.log('props:', props);
     const rapierColliderDesc = new RapierColliderDesc();
     const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(props);
     
-=======
-    // console.log('props:', props);
-    /*
-    // const option = params.rigidBody;
-    const colliderOpt = params.collider;
-    console.log('[ name ] ==========:', params.rigidBody.name);
-    */
-    
-    const rapierColliderDesc = new RapierColliderDesc();
-    const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(props);
-    
->>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
 
     const rapierRigidBody = new RapierRigidBody()
     const rigidBodyDesc = <RAPIER.RigidBodyDesc>rapierRigidBody.createRigidBodyFromOptions(props);
 
 
     this.rigidBody = this.rapier.world.createRigidBody(rigidBodyDesc);
-<<<<<<< HEAD
     this.collider = this.rapier.world.createCollider(colliderDesc, this.rigidBody);
 
     if(params.collider.onCollisionEnter) {
       this.onCollisionEnter = params.collider.onCollisionEnter;
       this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
-=======
-    const collider = this.rapier.world.createCollider(colliderDesc, this.rigidBody);
-
-    if(params.collider.onCollisionEnter) {
-      this.onCollisionEnter = params.collider.onCollisionEnter;
-      collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
->>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
     }
 
     this.rapier.dynamicBodies.push(this);

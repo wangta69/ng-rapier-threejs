@@ -5,11 +5,6 @@ export class ColliderProps {
   constructor() {
   }
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
   public fromParams(params: any) {
     const objectProps = {
       position: params.collider.position || new THREE.Vector3(), 
@@ -44,21 +39,13 @@ export class ColliderProps {
     };
 
     object.updateWorldMatrix(true, false);
-<<<<<<< HEAD
-=======
-
->>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
     new THREE.Matrix4()
       .copy(object.matrixWorld)
       // .premultiply(invertedParentMatrixWorld)
       .decompose(objectProps.position, objectProps.rotation, objectProps.scale);
 
-<<<<<<< HEAD
     // params.collider.position 가 존재하면 이것으로 position을 대처
     objectProps.position = params.collider.position || objectProps.position;
-=======
-    // const rotationEuler = new Euler().setFromQuaternion(_rotation, "XYZ");
->>>>>>> 558feb4026f1da035ae532ffaf81c976968479dc
 
     const { geometry } = object as THREE.Mesh;
     const { args, offset } = this.getColliderArgsFromGeometry(
