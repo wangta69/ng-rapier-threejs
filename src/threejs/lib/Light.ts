@@ -67,15 +67,12 @@ export class Light {
     Object.keys(this.lightProps).forEach((key: any) =>{
       if(key == 'shadow') {
         Object.keys(this.lightProps[key]).forEach((k: any) =>{
-          console.log('k:', k);
           if(k in LightShadowOptions) {
-            console.log(k, this.lightProps[key][k]);
             LightShadowOptions[k](this.light, this.lightProps[key][k]);
           }
         })
       } else {
         if(key in LightOptions) {
-          console.log(key, this.lightProps[key]);
           LightOptions[key](this.light, this.lightProps[key]);
         }
       }

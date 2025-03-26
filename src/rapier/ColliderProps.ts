@@ -1,5 +1,5 @@
 
-import * as THREE from "three";
+import * as THREE from 'three';
 
 export class ColliderProps {
   constructor() {
@@ -71,15 +71,9 @@ export class ColliderProps {
     shape: string
     ){
     switch (shape) {
-      case "cuboid":
-        geometry.computeBoundingBox();
-        const { boundingBox } = geometry;
-        const size = boundingBox!.getSize(new THREE.Vector3());
-        return {
-          args: [size.x / 2, size.y / 2, size.z / 2],
-          offset: boundingBox!.getCenter(new THREE.Vector3())
-        };
-      case "ball":
+      
+      case 'ball':
+      
         geometry.computeBoundingSphere();
         const { boundingSphere } = geometry;
         const radius = boundingSphere!.radius;
@@ -87,7 +81,7 @@ export class ColliderProps {
           args: [radius],
           offset: boundingSphere!.center
         };
-      case "trimesh":
+      case 'trimesh':
         const clonedGeometry = geometry.index
           ? geometry.clone()
           : this.mergeVertices(geometry);
@@ -98,15 +92,33 @@ export class ColliderProps {
           ],
           offset: new THREE.Vector3()
         };
-      case "hull":
+      case 'hull':
+      case 'convexHull':
         const g = geometry.clone();
         return {
           args: [(g.attributes as any).position.array as Float32Array],
           offset: new THREE.Vector3()
         };
+      // case 'icosahedron':
+        
+      //   geometry.computeBoundingSphere();
+      //   const { boundingSphere } = geometry;
+      //   const radius = boundingSphere!.radius;
+      //   return {
+      //     args: [radius],
+      //     offset: boundingSphere!.center
+      //   };
+      default: //  'cuboid', 'cylinder'
+        geometry.computeBoundingBox();
+        const { boundingBox } = geometry;
+        const size = boundingBox!.getSize(new THREE.Vector3());
+        return {
+          args: [size.x / 2, size.y / 2, size.z / 2],
+          offset: boundingBox!.getCenter(new THREE.Vector3())
+        };
     }
   
-    return { args: [], offset: new THREE.Vector3() };
+    // return { args: [], offset: new THREE.Vector3() };
   };
 
   /**

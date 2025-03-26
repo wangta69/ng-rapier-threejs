@@ -70,7 +70,7 @@ export class RapierColliderDesc {
     const scale = options.scale;
     const scaledArgs = this.scaleColliderArgs(shape!, options.args, scale);
     let desc;
-  
+
     switch(shape) {
       case 'heightfield': // Heightfield uses a vector
         desc = ColliderDesc[shape](<number>scaledArgs[0], <number>scaledArgs[1], <Float32Array<ArrayBufferLike>>scaledArgs[2], <Vector>scaledArgs[3], <number>scaledArgs[4]);
@@ -89,7 +89,10 @@ export class RapierColliderDesc {
       case 'capsule': 
       case 'cylinder': 
       case 'cone': 
-        desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1]);break;
+        desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1]);
+        
+        break;
+        
   
       case 'roundCuboid': 
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1], <number>scaledArgs[2], <number>scaledArgs[3]);break;
@@ -117,7 +120,6 @@ export class RapierColliderDesc {
     scale: THREE.Vector3
   ) {
 
-    console.log('args:', args);
     const newArgs = args.slice();
   
     switch(shape) {

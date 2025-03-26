@@ -90,7 +90,6 @@ export class World {
   public setCamera(cameraProps:CameraProps) {
     let {fov, aspect, near, far} = cameraProps;
 
-    console.log('cameraProp:', fov, aspect, near, far);
     fov = fov || 25; // 현재값 : 25
     aspect = aspect || window.innerWidth / window.innerHeight;
     near = near || 0.1; 

@@ -29,6 +29,8 @@ export class Material {
   private async loadmap(args: any) {
     if(args.textureUrl) {
       return this.TextureLoader(args.textureUrl);
+    } else if(args.objUrl) {
+
     }
     return null;
   }
@@ -36,4 +38,8 @@ export class Material {
   private async TextureLoader(url: string) {
     return await new THREE.TextureLoader().load( url );
   }
+
+  // private async OBJLoader(url: string) {
+  //   return await new THREE.OBJLoader().load( url );
+  // }
 }

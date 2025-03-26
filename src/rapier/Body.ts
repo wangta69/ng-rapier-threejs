@@ -41,8 +41,6 @@ export class Body {
       props = colliderProps.fromParams(params);
     }
 
-
-    console.log('props:', props);
     const rapierColliderDesc = new RapierColliderDesc();
     const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(props);
     

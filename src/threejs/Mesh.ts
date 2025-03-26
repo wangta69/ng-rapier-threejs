@@ -1,7 +1,8 @@
 import * as THREE from "three";
+import {Geometry} from './Geometry';
 import {Material} from './Material';
 import {LoaderGLTF} from './LoaderGLTF';
-
+import {LoaderObj} from './LoaderObj';
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
   public geometry: any;
@@ -23,6 +24,25 @@ export class Mesh {
     return <THREE.Mesh>this.mesh;
   }
 
+  public async loadObj(args: any) {
+    const loader = new LoaderObj();
+    const obj = await loader.create(args.url);
+
+    console.log('loadObj >> obj >>', obj);
+    this.mesh = obj.getObjectByName(args.name) || obj;
+
+    // this.material = await material.createMaterial(args.material);
+
+
+    this.mesh.name = args.name || null;
+    args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
+    this.mesh.castShadow = args.castShadow || false;
+    this.mesh.receiveShadow = args.receiveShadow || false;
+    this.mesh.position.set(args.position.x, args.position.y, args.position.z);
+
+    return this.mesh;
+  }
+
   public async loadGLTF(args: any) {
     const loader = new LoaderGLTF();
     this.mesh = await loader.create(args.url);
@@ -35,15 +55,9 @@ export class Mesh {
     return this.mesh;
   }
 
-  private createGeometry(args: any) {
-    switch(args.type) {
-      case 'box':
-        this.geometry = new THREE.BoxGeometry(args.width, args.height, args.depth);
-        break;
-      case 'sphere':
-        this.geometry = new THREE.SphereGeometry(args.radius, args.width, args.height);
-        break;
-    }
+  private createGeometry(params: any) {
+    params.args = params.args || [];
+    this.geometry = new Geometry().create(params)
   }
 
   private createMesh(args: any):THREE.Mesh {
