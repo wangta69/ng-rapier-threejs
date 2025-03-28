@@ -40,7 +40,7 @@ const RigidBodyOptions: any = {
   angvel: (rigidbody:RigidBodyDesc, value: THREE.Vector3) => {
     rigidbody.setAngvel(value);
   },
-  cansleep: (rigidbody:RigidBodyDesc, value: boolean) => {
+  canSleep: (rigidbody:RigidBodyDesc, value: boolean) => {
     rigidbody.setCanSleep(value);
   },
   ccdEnabled: (rigidbody:RigidBodyDesc, value: boolean) => {
