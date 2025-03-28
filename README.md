@@ -4,7 +4,6 @@
 ```
 npm i ng-rapier-threejs
 ```
-
 ## How to Use
 ```
 import {Rapier, World} from 'ng-rapier-threejs'

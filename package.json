@@ -1,16 +1,12 @@
 {
   "name": "ng-rapier-threejs",
   "version": "0.0.1",
-  "peerDependencies": {
+  "peerDependencies":{
     "@dimforge/rapier3d": "^0.14.0",
-    "@dimforge/rapier3d-compat": "^0.14.0"
-  },
-  "dependencies": {
-    
+    "@dimforge/rapier3d-compat": "^0.14.0",
     "three": "^0.172.0"
   },
   "devDependencies": {
-    
     "@types/three": "^0.172.0"
   },
   "description": "```\r npm i ng-rapier-threejs\r ```",
@@ -31,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/wangta69/ng-rapier-threejs/issues"
   },
-  "homepage": "https://github.com/wangta69/ng-rapier-threejs#readme"
+  "homepage": "https://github.com/wangta69/ng-rapier-threejs#readme",
+  "main": "index.js"
 }
