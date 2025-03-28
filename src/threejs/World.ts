@@ -78,7 +78,13 @@ export class World {
     return this;
   }
 
-  public setRenderer(rendererProps: RendererProps) {
+  /**
+   * 
+   * @param rendererProps { antialias, alpha }
+   * @param params {pixelRatio, size:[]}
+   * @returns 
+   */
+  public setRenderer(rendererProps: RendererProps, params?: any) {
     this.renderer = new THREE.WebGLRenderer( rendererProps );
  
     this.renderer.setPixelRatio( window.devicePixelRatio );
