@@ -1,5 +1,10 @@
 import {WebGLRenderer} from "three";
 
+export interface RendererProps {
+  antialias?: boolean, 
+  alpha?: boolean
+}
+
 
 export const RendererOptions: any = {
   pixelRatio: (renderer:WebGLRenderer, value:number) => {
@@ -12,17 +17,23 @@ export const RendererOptions: any = {
 }
 
 export class Renderer {
-  private lightProps: any;
   public renderer!: WebGLRenderer;
-  constructor(lightProps: any) {
-    this.lightProps = lightProps;
+  constructor() {
+   
   }
 
-  private setProperty(rendererProps: any) {
+  public WebGLRenderer(rendererProps: RendererProps) {
+    this.renderer = new WebGLRenderer( rendererProps );
+    return this;
+  };
+
+  public setProperty(rendererProps: any) {
     Object.keys(rendererProps).forEach((key: any) =>{
       if(key in RendererOptions) {
-        // RendererOptions[key](this.light, this.lightProps[key]);
+        RendererOptions[key](this.renderer, rendererProps[key]);
       }
     })
+
+    return this;
   }
 }

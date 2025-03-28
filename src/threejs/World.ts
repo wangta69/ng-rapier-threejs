@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import {Light,} from './lib/Light';
-
+import {Light} from './lib/Light';
+import {Renderer, RendererProps} from './lib/Renderer';
 interface CameraProps {
   fov?: number, 
   aspect?: number, 
@@ -16,10 +16,6 @@ interface ScreenProps {
   height?: number
 }
 
-interface RendererProps {
-  antialias?: boolean, 
-  alpha?: boolean
-}
 
 @Injectable({
   providedIn: 'root',
@@ -84,11 +80,21 @@ export class World {
    * @param params {pixelRatio, size:[]}
    * @returns 
    */
-  public setRenderer(rendererProps: RendererProps, params?: any) {
-    this.renderer = new THREE.WebGLRenderer( rendererProps );
- 
-    this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.setSize( this.screen.width, this.screen.height );
+  public setRenderer(rendererProps: RendererProps, property?: any) {
+    // this.renderer = new THREE.WebGLRenderer( rendererProps ).setProperty();
+    property = property || {};
+    
+    property.size = property.size || [this.screen.width, this.screen.height];
+    console.log('property:', property);
+    property.pixelRatio = property.pixelRatio || window.devicePixelRatio;
+    const renderer = new Renderer().WebGLRenderer( rendererProps).setProperty(
+      property
+    );
+
+    console.log('renderer.renderer:', renderer.renderer);
+    this.renderer = renderer.renderer;
+    // this.renderer.setPixelRatio( window.devicePixelRatio );
+    // this.renderer.setSize( this.screen.width, this.screen.height );
     this.container.appendChild( this.renderer.domElement );
     return this;
   }
