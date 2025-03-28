@@ -1,21 +1,20 @@
 import * as THREE from "three";
 
+export type IGeometry = 
+  THREE.BoxGeometry | 
+    THREE.SphereGeometry | 
+    THREE.CylinderGeometry | 
+    THREE.IcosahedronGeometry |
+    THREE.TorusKnotGeometry
+
 export class Geometry {
   constructor() {
 
   }
 
-  public create(params: any): 
-    THREE.BoxGeometry | 
-    THREE.SphereGeometry | 
-    THREE.CylinderGeometry | 
-    THREE.IcosahedronGeometry |
-    THREE.TorusKnotGeometry {
+  public create(params: any): IGeometry {
     // let geometry: THREE.BoxGeometry | THREE.SphereGeometry | THREE.CylinderGeometry | THREE.IcosahedronGeometry;
     switch(params.type) {
-      // case 'box':
-      //   // this.geometry = new THREE.BoxGeometry(args.width, args.height, args.depth);
-      //   return new THREE.BoxGeometry(...params.args);
       case 'sphere':
         return new THREE.SphereGeometry(...params.args);
       case 'cylinder':

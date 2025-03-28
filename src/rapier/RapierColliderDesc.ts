@@ -1,10 +1,23 @@
 
 import * as THREE from "three";
 import {
-  Collider,
+  // Collider,
   ColliderDesc,
-  Vector
+  Vector,
+  ActiveEvents,
+  // Vector3
 } from "@dimforge/rapier3d-compat";
+
+// export const vector3ToRapierVector = (v: THREE.Vector3Like) => {
+//   if (Array.isArray(v)) {
+//     return new Vector3(v[0], v[1], v[2]);
+//   } else if (typeof v === "number") {
+//     return new Vector3(v, v, v);
+//   } else {
+//     const threeVector3 = v as Vector3;
+//     return new Vector3(threeVector3.x, threeVector3.y, threeVector3.z);
+//   }
+// };
 
 export type ColliderShape =
   | "cuboid"
@@ -25,39 +38,65 @@ export type ColliderShape =
 
 
 const ColliderOptions: any = {
-
-  sensor: (collider:Collider, value: boolean) => {
-    collider.setSensor(value);
-  },
-  collisionGroups: (collider:Collider, value: number) => {
-    collider.setCollisionGroups(value);
-  },
-  solverGroups: (collider:Collider, value: number) => {
-    collider.setSolverGroups(value);
-  },
-  friction: (collider:Collider, value: number) => {
-    collider.setFriction(value);
-  },
-  frictionCombineRule: (collider:Collider, value: number) => {
-    collider.setFrictionCombineRule(value);
-  },
-  mass: (collider:Collider, value: number) => {
-    collider.setMass(value);
-  },
-  restitution: (collider:Collider, value: number) => {
-    collider.setRestitution(value);
-  },
-  restitutionCombineRule: (collider:Collider, value: number) => {
-    collider.setRestitutionCombineRule(value);
-  },
-  activeCollisionTypes: (collider:Collider, value: number) => {
+  activeCollisionTypes: (collider:ColliderDesc, value: number) => {
     collider.setActiveCollisionTypes(value);
   },
-  contactSkin: (collider:Collider, value: number) => {
+  activeEvents: (collider:ColliderDesc, value: ActiveEvents) => {
+    collider.setActiveEvents(value);
+  },
+  activeHooks: (collider:ColliderDesc, value: number) => {
+    collider.setActiveHooks(value);
+  },
+  collisionGroups: (collider:ColliderDesc, value: number) => {
+    collider.setCollisionGroups(value);
+  },
+  contactForceEventThreshold: (collider:ColliderDesc, value: number) => {
+    collider.setContactForceEventThreshold(value);
+  },
+  contactSkin: (collider:ColliderDesc, value: number) => {
     collider.setContactSkin(value);
+  },
+  density: (collider:ColliderDesc, value: number) => {
+    collider.setDensity(value);
+  },
+  enabled: (collider:ColliderDesc, value: boolean) => {
+    collider.setEnabled(value);
+  },
+  friction: (collider:ColliderDesc, value: number) => {
+    collider.setFriction(value);
+  },
+  frictionCombineRule: (collider:ColliderDesc, value: number) => {
+    collider.setFrictionCombineRule(value);
+  },
+  mass: (collider:ColliderDesc, value: number) => {
+    collider.setMass(value);
+  },
+  // massProperties: (collider:ColliderDesc, value: number) => {
+  //   collider.setMassProperties(mass: number, centerOfMass: Vector, principalAngularInertia: Vector, angularInertiaLocalFrame: Rotatio);
+  // },
+  restitution: (collider:ColliderDesc, value: number) => {
+    collider.setRestitution(value);
+  },
+  restitutionCombineRule: (collider:ColliderDesc, value: number) => {
+    collider.setRestitutionCombineRule(value);
+  },
+  rotation: (collider:ColliderDesc, value: THREE.Quaternion) => {
+    collider.setRotation(value);
+  },
+  sensor: (collider:ColliderDesc, value: boolean) => {
+    collider.setSensor(value);
+  },
+  solverGroups: (collider:ColliderDesc, value: number) => {
+    collider.setSolverGroups(value);
+  },
+  translation: (collider:ColliderDesc, value: THREE.Vector3) => {
+    collider.setTranslation(value.x, value.y, value.z);
   }
 };
 
+export type scaledArgs = {
+
+}
 export class RapierColliderDesc {
 
   constructor() {}
@@ -66,10 +105,14 @@ export class RapierColliderDesc {
 
   }
   public createShapeFromOptions(options: any): ColliderDesc | null {
+
     const shape:ColliderShape = options.shape;
     const scale = options.scale;
+
+
+    // const scaledArgs: number | number[] | Float32Array<ArrayBufferLike>[] | Uint32Array<ArrayBufferLike>[] | Vector[] = this.scaleColliderArgs(shape!, options.args, scale);
     const scaledArgs = this.scaleColliderArgs(shape!, options.args, scale);
-    let desc;
+    let desc:ColliderDesc;
 
     switch(shape) {
       case 'heightfield': // Heightfield uses a vector
@@ -77,31 +120,31 @@ export class RapierColliderDesc {
         break;
       case 'trimesh':
       case 'convexMesh':
-        desc = ColliderDesc[shape](<Float32Array<ArrayBufferLike>>scaledArgs[0], <Uint32Array<ArrayBufferLike>>scaledArgs[1]);break
+        desc = <ColliderDesc>ColliderDesc[shape](<Float32Array<ArrayBufferLike>>scaledArgs[0], <Uint32Array<ArrayBufferLike>>scaledArgs[1]);break
       case 'convexHull':
-        desc = ColliderDesc[shape](<Float32Array<ArrayBufferLike>>scaledArgs[0]);break;
+        desc = <ColliderDesc>ColliderDesc[shape](<Float32Array<ArrayBufferLike>>scaledArgs[0]);break;
       case 'polyline': desc = ColliderDesc[shape!](<Float32Array<ArrayBufferLike>>scaledArgs[0], <Uint32Array<ArrayBufferLike>>scaledArgs[1]);break;
-      case 'roundConvexHull': desc = ColliderDesc[shape!](<Float32Array<ArrayBufferLike>>scaledArgs[0], <number>scaledArgs[1]);break;
-      case 'roundConvexMesh': desc = ColliderDesc[shape!](<Float32Array<ArrayBufferLike>>scaledArgs[0], <Uint32Array<ArrayBufferLike>>scaledArgs[1], <number>scaledArgs[2]);break;
+      case 'roundConvexHull': desc = <ColliderDesc>ColliderDesc[shape!](<Float32Array<ArrayBufferLike>>scaledArgs[0], <number>scaledArgs[1]);break;
+      case 'roundConvexMesh': desc = <ColliderDesc>ColliderDesc[shape!](<Float32Array<ArrayBufferLike>>scaledArgs[0], <Uint32Array<ArrayBufferLike>>scaledArgs[1], <number>scaledArgs[2]);break;
     
-      case 'ball': desc = ColliderDesc[shape](<number>scaledArgs[0]);break;
+      case 'ball': 
+        desc = ColliderDesc[shape](<number>scaledArgs[0]);
+        // desc = ColliderDesc[shape](scaledArgs[0]);
+        // desc = ColliderDesc[shape](...scaledArgs);
+      break;
   
       case 'capsule': 
       case 'cylinder': 
       case 'cone': 
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1]);
-        
         break;
-        
-  
       case 'roundCuboid': 
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1], <number>scaledArgs[2], <number>scaledArgs[3]);break;
       default: // cuboid, roundCylinder, roundCone
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1], <number>scaledArgs[2]);
         break;
     }
-  
-    return this.setColliderDescFromOption(<ColliderDesc>desc, options);
+    return this.setColliderDescFromOption(desc, options);
   };
 
 
@@ -121,7 +164,6 @@ export class RapierColliderDesc {
   ) {
 
     const newArgs = args.slice();
-  
     switch(shape) {
       case 'heightfield': // Heightfield uses a vector
         const s = newArgs[3] as { x: number; y: number; z: number };
@@ -143,7 +185,6 @@ export class RapierColliderDesc {
 
   private scaleVertices(vertices: ArrayLike<number>, scale: THREE.Vector3){
     const scaledVerts = Array.from(vertices);
-
     for (let i = 0; i < vertices.length / 3; i++) {
       scaledVerts[i * 3] *= scale.x;
       scaledVerts[i * 3 + 1] *= scale.y;

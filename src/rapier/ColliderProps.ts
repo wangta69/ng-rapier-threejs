@@ -1,90 +1,84 @@
 
 import * as THREE from 'three';
-
+export type TobjectProps = 
+{
+  position: THREE.Vector3, 
+  rotation: THREE.Quaternion, 
+  scale: THREE.Vector3,
+  shape: string,
+  args: any[],
+  // args: ,
+  offset: THREE.Vector3,
+}
 export class ColliderProps {
-  constructor() {
-  }
-
-  public fromParams(params: any) {
-    const objectProps = {
-      position: params.collider.position || new THREE.Vector3(), 
-      rotation: new THREE.Quaternion(), 
-      scale: new THREE.Vector3(),
-      shape: params.collider.shape || 'cuboid',
-      args: params.collider.args,
-      offset: null,
-      restitution: params.collider.restitution,
-      friction: params.collider.friction
-    };
-
-
-
-    return objectProps;
-  }
+  
   /**
-   * 
+   * THREE.Object3D 를 입력받아 shape구성에 필요한 args 및 offset를 가져돈다.
    * @param args = {object3d, collider}
    */
-  public fromMesh(params: any) {
-    // const childColliderProps: ColliderProps[] = [];
+  public create(params: any) {
+    const object:THREE.Object3D = params.object3d; //  | THREE.Group
+    let _translation = new THREE.Vector3();
+    let _rotation = new THREE.Quaternion(); 
+    let _scale = new THREE.Vector3(1, 1, 1);
+    let _args: any = [];
+    let _offset = new THREE.Vector3();
 
-    const object:THREE.Object3D = params.object3d;
-    const objectProps = {
-      position: new THREE.Vector3(), 
-      rotation: new THREE.Quaternion(), 
-      scale: new THREE.Vector3(),
-      shape: params.collider.shape || 'cuboid',
-      args: [0, 0, 0],
-      offset: null
-    };
+    params.collider = params.collider || {};
+    params.body = params.body || {};
 
-    object.updateWorldMatrix(true, false);
-    new THREE.Matrix4()
-      .copy(object.matrixWorld)
-      // .premultiply(invertedParentMatrixWorld)
-      .decompose(objectProps.position, objectProps.rotation, objectProps.scale);
+    if(!params.collider.args && object) { // 별도의 args가 없는 경우 형태를 자동으로 계산한다.
+   
+      object.updateWorldMatrix(true, true);
+      new THREE.Matrix4()
+        .copy(object.matrixWorld)
+        .decompose(_translation, _rotation, _scale);
 
-    // params.collider.position 가 존재하면 이것으로 position을 대처
-    objectProps.position = params.collider.position || objectProps.position;
-
-    const { geometry } = object as THREE.Mesh;
-    const { args, offset } = this.getColliderArgsFromGeometry(
-      geometry,
-      objectProps.shape
-    );
-
-    objectProps.args = args;
-    objectProps.offset = offset;
-
-    return this.mergeProps(objectProps, params);
-    // return objectProps;
-
+        object.traverse((mesh: any) => {
+          if (mesh.type === 'Mesh') {
+            const { args, offset } = this.getColliderArgsFromGeometry(
+              mesh,
+              params.collider.shape
+            );
+      
+            _args.push(...args);
+            _offset = offset;
+          }
+        })
+      }
+    
+    params.collider.args = params.collider.args || _args;
+    params.collider.offset = params.collider.offset || _offset;
+    params.collider.shape = params.collider.shape || 'cuboid';
+    params.collider.scale = params.collider.scale || _scale;
+    params.collider.rotation = params.collider.rotation || _rotation;
+    params.collider.translation = params.collider.translation || _translation;
+    
+    params.body.rotation = params.body.rotation || new THREE.Quaternion();
+    params.body.translation = params.body.translation || new THREE.Vector3();
   };
 
-  private mergeProps(objectProps: any, params: any) {
-    const merged = {...params.collider, ...objectProps};
-    return merged;
-  }
-
   private getColliderArgsFromGeometry(
-    geometry: any,
+    mesh: THREE.Mesh,
     shape: string
     ){
+
     switch (shape) {
       
       case 'ball':
       
-        geometry.computeBoundingSphere();
-        const { boundingSphere } = geometry;
+      mesh.geometry.computeBoundingSphere();
+        const { boundingSphere } = mesh.geometry;
         const radius = boundingSphere!.radius;
         return {
           args: [radius],
           offset: boundingSphere!.center
         };
       case 'trimesh':
-        const clonedGeometry = geometry.index
-          ? geometry.clone()
-          : this.mergeVertices(geometry);
+      // case 'cylinder':
+        const clonedGeometry = mesh.geometry.index
+          ? mesh.geometry.clone()
+          : this.mergeVertices(mesh.geometry);
         return {
           args: [
             (clonedGeometry.attributes as any).position.array as Float32Array,
@@ -94,31 +88,22 @@ export class ColliderProps {
         };
       case 'hull':
       case 'convexHull':
-        const g = geometry.clone();
+        const g = mesh.geometry.clone();
         return {
           args: [(g.attributes as any).position.array as Float32Array],
           offset: new THREE.Vector3()
         };
-      // case 'icosahedron':
-        
-      //   geometry.computeBoundingSphere();
-      //   const { boundingSphere } = geometry;
-      //   const radius = boundingSphere!.radius;
-      //   return {
-      //     args: [radius],
-      //     offset: boundingSphere!.center
-      //   };
-      default: //  'cuboid', 'cylinder'
-        geometry.computeBoundingBox();
-        const { boundingBox } = geometry;
+      default: //  'cuboid', 'cylinder', cones
+      
+      mesh.geometry.computeBoundingBox();
+        const { boundingBox } = mesh.geometry;
+
         const size = boundingBox!.getSize(new THREE.Vector3());
         return {
           args: [size.x / 2, size.y / 2, size.z / 2],
           offset: boundingBox!.getCenter(new THREE.Vector3())
         };
     }
-  
-    // return { args: [], offset: new THREE.Vector3() };
   };
 
   /**
@@ -239,8 +224,6 @@ export class ColliderProps {
         }
       }
     }
-
-    // indices\
     result.setIndex(newIndices)
     return result
   }

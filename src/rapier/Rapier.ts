@@ -45,6 +45,7 @@ export class Rapier {
   }
 
   private update(clock: any) {
+    
     const delta = clock.delta;
     this.world.timestep = Math.min(delta, 0.1);
     this.world.step();

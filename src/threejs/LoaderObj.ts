@@ -18,11 +18,10 @@ export class LoaderObj {
   }
 
   private loader(url: string, name?: string ) {
-
     return new Promise<THREE.Group>((resolve, reject) => {
       const loader = new OBJLoader(); 
       loader.load(url,  ( obj ) => {
-        
+        console.log('obj:',obj);
         resolve(obj);
       }, ( xhr ) => {// called while loading is progressing
         // console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -31,17 +30,4 @@ export class LoaderObj {
       });
     })
   }
-
-/*
-  private loader(url: string) {
-    new OBJLoader().loadAsync('/assets/welcome.obj').then((object) => {
-        this.scene.add(object)
-        const suzanneMesh: any = object.getObjectByName('Suzanne')                
-        suzanneMesh.material = new THREE.MeshNormalMaterial()
-        suzanneMesh.castShadow = true
-
-    })
-  }
-  */
-
 }

@@ -12,7 +12,7 @@ export const _scale = new Vector3();
 
 export {ColliderProps} from './rapier/ColliderProps';
 export {RapierColliderDesc} from './rapier/RapierColliderDesc';
-export {RapierRigidBody} from './rapier/RapierRigidBody';
+export {RapierRigidBodyDesc} from './rapier/RapierRigidBodyDesc';
 
 
 

@@ -1,12 +1,12 @@
 import * as THREE from "three";
-import {Geometry} from './Geometry';
+import {Geometry, IGeometry} from './Geometry';
 import {Material} from './Material';
 import {LoaderGLTF} from './LoaderGLTF';
 import {LoaderObj} from './LoaderObj';
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
-  public geometry: any;
-  public material: any;
+  // public geometry!: IGeometry;
+  // public material!: THREE.Material;
   constructor() {}
 
   /**
@@ -16,52 +16,56 @@ export class Mesh {
    * @param material 
    */
   public async create(args: any):Promise<THREE.Mesh> {
-    this.createGeometry(args.geometry)
-    const material = new Material();
-    this.material = await material.createMaterial(args.material);
+    const geometry = this.createGeometry(args.geometry)
+    // const materialObj = new Material();
+    const material = await new Material().createMaterial(args.material);
 
-    this.mesh = this.createMesh(args.mesh || {});
+    this.mesh = this.createMesh(geometry, material, args.mesh || {});
     return <THREE.Mesh>this.mesh;
   }
 
   public async loadObj(args: any) {
     const loader = new LoaderObj();
-    const obj = await loader.create(args.url);
+    const obj = await loader.create(args.mesh.url);
 
-    console.log('loadObj >> obj >>', obj);
-    this.mesh = obj.getObjectByName(args.name) || obj;
-
+    this.mesh = obj.getObjectByName(args.mesh.name) || obj;
+    const material = new Material();
     // this.material = await material.createMaterial(args.material);
-
+    (this.mesh as any).material = await material.createMaterial(args.material);
 
     this.mesh.name = args.name || null;
     args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
     this.mesh.castShadow = args.castShadow || false;
     this.mesh.receiveShadow = args.receiveShadow || false;
-    this.mesh.position.set(args.position.x, args.position.y, args.position.z);
+
+    args.position ? this.mesh.position.set(args.position.x, args.position.y, args.position.z) : null;
 
     return this.mesh;
   }
 
-  public async loadGLTF(args: any) {
-    const loader = new LoaderGLTF();
-    this.mesh = await loader.create(args.url);
-    this.mesh.name = args.name || null;
-    args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
-    this.mesh.castShadow = args.castShadow || false;
-    this.mesh.receiveShadow = args.receiveShadow || false;
-    this.mesh.position.set(args.position.x, args.position.y, args.position.z);
+  public async loadGLTF(args: any, callback:(gltf:LoaderGLTF)=>void) {
+    // const loader = new LoaderGLTF();
+    const gltf = new LoaderGLTF();
+    await gltf.loader(args.url);
+    callback(gltf);
 
-    return this.mesh;
+    return this;
+    // this.mesh.name = args.name || null;
+    // args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
+    // this.mesh.castShadow = args.castShadow || false;
+    // this.mesh.receiveShadow = args.receiveShadow || false;
+    // args.position ? this.mesh.position.set(args.position.x, args.position.y, args.position.z) : null;
+
+    // return this.mesh;
   }
 
   private createGeometry(params: any) {
     params.args = params.args || [];
-    this.geometry = new Geometry().create(params)
+    return new Geometry().create(params)
   }
 
-  private createMesh(args: any):THREE.Mesh {
-    const mesh = new THREE.Mesh( this.geometry, this.material);
+  private createMesh(geometry: any, material: any, args: any):THREE.Mesh {
+    const mesh = new THREE.Mesh( geometry, material);
     if(args.position) mesh.position.set(args.position.x, args.position.y, args.position.z);
     if(args.scale) mesh.scale.set(args.scale.x, args.scale.y, args.scale.z);
     if(args.castShadow) mesh.castShadow = true;
