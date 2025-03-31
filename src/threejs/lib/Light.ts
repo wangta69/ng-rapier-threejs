@@ -13,16 +13,18 @@ export const LightOptions: any = {
   penumbra: (light:THREE.SpotLight, value: number) => { 
     light.penumbra = value;
   },
-  castShadow: (light:THREE.SpotLight, value: boolean) => {
+  castShadow: (light:THREE.Light, value: boolean) => {
     light.castShadow = value;
   },
   // Numeric value of the light's strength/intensity. Expects a Float. Default 1.
-  intensity: (light:THREE.SpotLight, value: number) => {
+  intensity: (light:THREE.Light, value: number) => {
     light.intensity = value;
   },
   // Hexadecimal color of the light. Default 0xffffff (white).
-  color: (light:THREE.SpotLight, value: THREE.Color) => {
-    light.color = value;
+  //  | THREE.SpotLight | THREE.AmbientLight | THREE.DirectionalLight
+  color: (light:THREE.Light, value: number) => {
+    light.color = new THREE.Color().setHex(value);
+    // light.color = value;
   },
   // Maximum range of the light. Default is 0 (no limit). Expects a Float.
   distance: (light:THREE.SpotLight, value: number) => {
@@ -41,22 +43,32 @@ export const LightShadowOptions: any = {
 
 export class Light {
   private lightProps: any;
-  public light!: THREE.SpotLight | THREE.AmbientLight | THREE.DirectionalLight;
+  public light!: THREE.HemisphereLight | THREE.AmbientLight | THREE.DirectionalLight | THREE.PointLight | THREE.SpotLight ;
+  public helper!: THREE.HemisphereLightHelper | THREE.DirectionalLightHelper | THREE.PointLightHelper | THREE.SpotLightHelper ;
   constructor(lightProps: any) {
     this.lightProps = lightProps;
     this.create();
+    if(lightProps.helper) {
+      this.createHelpers();
+    }
   }
 
   private create() {
     switch(this.lightProps.type) {
-      case 'spot':
-        this.light = new THREE.SpotLight();
-        break;
       case 'ambient':
         this.light = new THREE.AmbientLight();
         break;
+      case 'hemisphere':
+        this.light = new THREE.HemisphereLight();
+        break;
       case 'directional':
         this.light = new THREE.DirectionalLight();
+        break;
+      case 'point':
+        this.light = new THREE.PointLight();
+        break;
+      case 'spot':
+        this.light = new THREE.SpotLight();
         break;
     }
 
@@ -64,6 +76,7 @@ export class Light {
   }
 
   private setProperty() {
+
     Object.keys(this.lightProps).forEach((key: any) =>{
       if(key == 'shadow') {
         Object.keys(this.lightProps[key]).forEach((k: any) =>{
@@ -77,5 +90,25 @@ export class Light {
         }
       }
     })
+  }
+
+  private createHelpers() {
+    switch(this.lightProps.type) {
+      // case 'ambient':
+      //   this.helper = new THREE.AmbientLightHelper(this.light, 0.1);
+      //   break;
+      case 'hemisphere':
+        this.helper = new THREE.HemisphereLightHelper(<THREE.HemisphereLight>this.light, 0.1);
+        break;
+      case 'directional':
+        this.helper = new THREE.DirectionalLightHelper(<THREE.DirectionalLight>this.light, 0.1);
+        break;
+      case 'point':
+        this.helper = new THREE.PointLightHelper(<THREE.PointLight>this.light, 0.1);
+        break;
+      case 'spot':
+        this.helper = new THREE.SpotLightHelper(<THREE.SpotLight>this.light, 0.1);
+        break;
+    }
   }
 }

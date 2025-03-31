@@ -40,6 +40,7 @@ export class Body {
     const rapierColliderDesc = new RapierColliderDesc();
     const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(params.collider);
    
+    
     const rapierRigidBodyDesc = new RapierRigidBodyDesc()
     const rigidBodyDesc = <RAPIER.RigidBodyDesc>rapierRigidBodyDesc.createRigidBodyFromOptions(params.body);
 
@@ -68,19 +69,33 @@ export class Body {
     }
 
     if(typeof this.onCollisionEnter === 'function') {
+      
       this.rapier.world.step(this.eventQueue);
       this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
         
         if (started) {
-          
+          console.log('this.collider:', this.collider);
+          console.log('handle1:', handle1);
+          console.log('handle2:', handle2);
           this.rapier.world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
             const contactFid1 = manifold.contactFid1;
+            const contactFid2 = manifold.contactFid2;
+
+            console.log('manifold:', manifold);
+            console.log('manifold.contactFid1:', contactFid1);
+            console.log('manifold.contactFid2:', contactFid2);
+            console.log('flipped:', flipped);
+            // console.log('onCollisionEnter:', this.onCollisionEnter);
+
+            
             this.onCollisionEnter();
           });
         }
       });
     }
+    
     if(this.useFrame) {
+      // console.log('this.useFrame:', this.useFrame)
       this.useFrame({time});
     }
   }

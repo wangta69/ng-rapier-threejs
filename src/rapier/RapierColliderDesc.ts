@@ -142,6 +142,7 @@ export class RapierColliderDesc {
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1], <number>scaledArgs[2], <number>scaledArgs[3]);break;
       default: // cuboid, roundCylinder, roundCone
         desc = ColliderDesc[shape!](<number>scaledArgs[0], <number>scaledArgs[1], <number>scaledArgs[2]);
+        // desc = ColliderDesc[shape!](0.5, 0.5, 0.5);
         break;
     }
     return this.setColliderDescFromOption(desc, options);

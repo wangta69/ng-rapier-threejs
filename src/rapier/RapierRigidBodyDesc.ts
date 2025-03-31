@@ -84,7 +84,7 @@ export class RapierRigidBodyDesc {
   constructor() {}
 
   public createRigidBodyFromOptions(options: any): RigidBodyDesc | null {
-    const type = this.rigidBodyTypeFromString(options?.type || "dynamic");
+    const type = this.rigidBodyTypeFromString(options?.type || "fixed");
     const desc = new RigidBodyDesc(type);
     return this.setRigidBodyDescFromOption(<RigidBodyDesc>desc, options);
   };

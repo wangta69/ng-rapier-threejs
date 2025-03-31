@@ -85,13 +85,11 @@ export class World {
     property = property || {};
     
     property.size = property.size || [this.screen.width, this.screen.height];
-    console.log('property:', property);
     property.pixelRatio = property.pixelRatio || window.devicePixelRatio;
     const renderer = new Renderer().WebGLRenderer( rendererProps).setProperty(
       property
     );
 
-    console.log('renderer.renderer:', renderer.renderer);
     this.renderer = renderer.renderer;
     // this.renderer.setPixelRatio( window.devicePixelRatio );
     // this.renderer.setSize( this.screen.width, this.screen.height );
@@ -120,9 +118,42 @@ export class World {
     this.renderer.setSize( this.screen.width, this.screen.height ); 
   }
     
-  public setLights(lightProps: any) {  
-    const light = new Light(lightProps);
+  /**
+   * 
+   * @param lightProps 
+   * - type: 'spot',
+   * - intensity: Math.PI * 10,
+   * - angle: Math.PI / 1.8,
+   * - penumbra: 0.5,
+   * - castShadow: true,
+   * -shadow: {blurSamples: 10, radius: 5}
+   * @returns 
+   */
+  // public setLights(lightProps: any) {  
+  //   const light = new Light(lightProps);
+  //   this.scene.add(light.light);
+  //   return this;
+  // }
+
+  public setLight(lightProp: any) {  
+    const light = new Light(lightProp);
     this.scene.add(light.light);
+    if(lightProp.helper) {
+      this.scene.add( light.helper );
+    }
+    return this;
+  }
+
+  public setLights(lightProps: any[]) {  
+    const holder =  new THREE.Object3D;
+    lightProps.forEach((lightProp: any) => {
+      const light = new Light(lightProp);
+      holder.add( light.light );
+      if(lightProp.helper) {
+        this.scene.add( light.helper );
+      }
+    });
+    this.scene.add( holder);
     return this;
   }
 

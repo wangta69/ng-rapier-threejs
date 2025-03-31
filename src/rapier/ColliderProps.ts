@@ -51,11 +51,14 @@ export class ColliderProps {
     params.collider.offset = params.collider.offset || _offset;
     params.collider.shape = params.collider.shape || 'cuboid';
     params.collider.scale = params.collider.scale || _scale;
-    params.collider.rotation = params.collider.rotation || _rotation;
-    params.collider.translation = params.collider.translation || _translation;
+    params.collider.rotation = params.collider.rotation || new THREE.Quaternion();
+    params.collider.translation = params.collider.translation || new THREE.Vector3();
+
+
+    params.body.rotation = params.body.rotation || _rotation;
+    params.body.translation = params.body.translation || _translation;
     
-    params.body.rotation = params.body.rotation || new THREE.Quaternion();
-    params.body.translation = params.body.translation || new THREE.Vector3();
+    
   };
 
   private getColliderArgsFromGeometry(
