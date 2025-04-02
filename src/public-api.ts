@@ -25,6 +25,10 @@ export {Mesh} from './threejs/Mesh';
 // export {World as RapierWorld} from './threejs/World';
 export {Light} from './threejs/lib/Light';
 export {EventListener} from './threejs/lib/EventListener';
+
 export {LensFlare} from './threejs/addons/LensFlare';
+export {LoaderGLTF} from './threejs/addons/LoaderGLTF';
+export {LoaderObj} from './threejs/addons/LoaderObj';
+export {LoaderRGBE} from './threejs/addons/LoaderRGBE';
 
 

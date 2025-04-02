@@ -21,6 +21,20 @@ export class EventListener {
     wheel: {}
   }
 
+  public onMouseMove: any[] = []; // {document: fn}
+  public onMouseWheel: any[] = [];
+  public activeMouseMove(renderer: WebGLRenderer) {
+    document.addEventListener('click', () => {
+      renderer.domElement.requestPointerLock()
+    })
+  }
+
+  // public activeMouseWhee(renderer: WebGLRenderer) {
+  //   document.addEventListener('click', () => {
+  //     renderer.domElement.requestPointerLock()
+  //   })
+  // }
+
   public activeClickEvent(renderer: WebGLRenderer) {
     document.addEventListener('click', () => {
       renderer.domElement.requestPointerLock()
@@ -51,16 +65,38 @@ export class EventListener {
   }
 
   private onDocumentKey(e: KeyboardEvent) {
-    console.log('keyDown');
     this.keyMap[e.code] = e.type === 'keydown';
   }
 
-  private onDocumentMouseMove() {
-    console.log('onDocumentMouseMove');
+  private onDocumentMouseMove(e: MouseEvent) {
+
+    this.onMouseMove.forEach(fn =>{
+      fn.renderer.bind(this)(e);
+      // console.log(fn.renderer.bind(this)(e));
+    } )
   }
 
-  private onDocumentMouseWheel() {
-    console.log('onDocumentMouseWheel');
+  private onDocumentMouseWheel(e: MouseEvent) {
+    this.onMouseWheel.forEach(fn =>{
+      fn.renderer.bind(this)(e);
+      // console.log(fn.renderer.bind(this)(e));
+    } )
+  }
+
+  /**
+   * 
+   * @param fn {document | renderer: fn}
+   */
+  public addMouseMoveEvent(fn: any) {
+    this.onMouseMove.push(fn);
+  }
+
+  /**
+   * 
+   * @param fn {document | renderer: fn}
+   */
+  public addMouseWeelEvent(fn: any) {
+    this.onMouseWheel.push(fn);
   }
 
 }

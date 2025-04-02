@@ -1,12 +1,14 @@
 
 import * as THREE from "three";
 import {
-  // Collider,
   ColliderDesc,
   Vector,
   ActiveEvents,
-  // Vector3
 } from "@dimforge/rapier3d-compat";
+
+import {
+  interactionGroups
+} from './lib/interaction-group'
 
 // export const vector3ToRapierVector = (v: THREE.Vector3Like) => {
 //   if (Array.isArray(v)) {
@@ -47,8 +49,9 @@ const ColliderOptions: any = {
   activeHooks: (collider:ColliderDesc, value: number) => {
     collider.setActiveHooks(value);
   },
-  collisionGroups: (collider:ColliderDesc, value: number) => {
-    collider.setCollisionGroups(value);
+  collisionGroups: (collider:ColliderDesc, value: number[]) => {
+    const group = interactionGroups(value[0], value[1]);
+    collider.setCollisionGroups(group);
   },
   contactForceEventThreshold: (collider:ColliderDesc, value: number) => {
     collider.setContactForceEventThreshold(value);

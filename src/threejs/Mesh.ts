@@ -3,6 +3,13 @@ import {Geometry, IGeometry} from './Geometry';
 import {Material} from './Material';
 import {LoaderGLTF} from './addons/LoaderGLTF';
 import {LoaderObj} from './addons/LoaderObj';
+import {LoaderRGBE} from './addons/LoaderRGBE';
+
+export type Tmesh = {
+  geometry: any, // {type: 'box'}, // geometry 속성
+  material: any, // {type: 'standard'}, // material 속성
+  mesh: any, // { castShadow: true}
+}
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
   // public geometry!: IGeometry;
@@ -15,7 +22,7 @@ export class Mesh {
    * @param geometry {type: sphereGeometry}
    * @param material 
    */
-  public async create(args: any):Promise<THREE.Mesh> {
+  public async create(args: Tmesh):Promise<THREE.Mesh> {
     const geometry = this.createGeometry(args.geometry)
     // const materialObj = new Material();
     const material = await new Material().createMaterial(args.material);
@@ -48,6 +55,21 @@ export class Mesh {
     const gltf = new LoaderGLTF();
     await gltf.loader(args.url);
     callback(gltf);
+
+    return this;
+    // this.mesh.name = args.name || null;
+    // args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
+    // this.mesh.castShadow = args.castShadow || false;
+    // this.mesh.receiveShadow = args.receiveShadow || false;
+    // args.position ? this.mesh.position.set(args.position.x, args.position.y, args.position.z) : null;
+
+    // return this.mesh;
+  }
+
+  public async loadRGBE(args: any, callback:(gltf:LoaderGLTF)=>void) {
+    // const loader = new LoaderGLTF();
+    const gltf = new LoaderRGBE();
+
 
     return this;
     // this.mesh.name = args.name || null;

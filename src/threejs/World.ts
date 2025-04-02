@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {Light} from './lib/Light';
+import {Mesh, Tmesh} from './Mesh';
 import {Renderer, RendererProps} from './lib/Renderer';
 interface CameraProps {
   fov?: number, 
@@ -43,6 +44,8 @@ export class World {
     this.container = container;
     return this;
   }
+
+
 
   public enableControls(controlProps?:any) {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -169,6 +172,12 @@ export class World {
     return this;
   }
 
+  public async addMesh(props: Tmesh) {
+    const mesh = await new Mesh().create(props);
+    this.scene.add(mesh);
+    return mesh;
+  }
+
   public clear() {
     this.scene.clear();
     return this;
@@ -176,14 +185,14 @@ export class World {
 
   public render() {
 
-    const delta = this.clock.getDelta();
-    const elapsedTime = this.clock.getElapsedTime();
+    // const delta = this.clock.getDelta();
+    // const elapsedTime = this.clock.getElapsedTime();
     if(this.controls) {
       this.controls.update();
     }
 
     this.updates.forEach((fnc:(body: any) => void)=>{
-      fnc({delta, elapsedTime});
+      fnc(this.clock);
     })
 
     this.renderer.render( this.scene, this.camera );

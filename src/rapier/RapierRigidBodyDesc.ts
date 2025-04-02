@@ -70,15 +70,23 @@ const RigidBodyOptions: any = {
   softCcdPrediction: (rigidbody:RigidBodyDesc, value: number) => {
     rigidbody.setSoftCcdPrediction(value);
   },
-  translation: (rigidbody:RigidBodyDesc, value: THREE.Vector3) => {
-    rigidbody.setTranslation(value.x,  value.y, value.z);
+  translation: (rigidbody:RigidBodyDesc, value: THREE.Vector3 | number[]) => {
+    if(Array.isArray(value)){
+      rigidbody.setTranslation(value[0],  value[1], value[2]);
+      // const v = value as const;
+      // rigidbody.setTranslation(...value);
+      // rigidbody.setTranslation(...(value as const));
+    } else {
+      rigidbody.setTranslation(value.x,  value.y, value.z);
+    }
+    
   },
 
   userData: (rigidbody:RigidBodyDesc, value: any ) => {
     rigidbody.setUserData(value);
   },
 };
-
+``
 export class RapierRigidBodyDesc {
 
   constructor() {}

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import RAPIER from '@dimforge/rapier3d-compat';
+import * as THREE from 'three';
+
 import { World as  ThreeJsWorld} from '../threejs/World';
 import {RapierDebugRenderer} from './RapierDebugRenderer';
 // import {RigidBody} from './RigidBody';
@@ -44,9 +46,9 @@ export class Rapier {
     return this;
   }
 
-  private update(clock: any) {
+  private update(clock: THREE.Clock) {
     
-    const delta = clock.delta;
+    const delta = clock.getDelta();
     this.world.timestep = Math.min(delta, 0.1);
     this.world.step();
 
