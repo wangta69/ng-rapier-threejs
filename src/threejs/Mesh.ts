@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import {Geometry, IGeometry} from './Geometry';
 import {Material} from './Material';
-import {LoaderGLTF} from './LoaderGLTF';
-import {LoaderObj} from './LoaderObj';
+import {LoaderGLTF} from './addons/LoaderGLTF';
+import {LoaderObj} from './addons/LoaderObj';
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
   // public geometry!: IGeometry;

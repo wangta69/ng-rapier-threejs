@@ -2,25 +2,16 @@ import * as THREE from "three";
 
 
 export const LightOptions: any = {
-  position: (light:THREE.Light, value:number[]) => {
-    light.position.set(value[0], value[1], value[2]);
-  },
+  
   // Maximum angle of light dispersion from its direction whose upper bound is Math.PI/2.
   angle: (light:THREE.SpotLight, value: number) => {
     light.angle = value;
   },
-  // Percent of the SpotLight cone that is attenuated due to penumbra. Takes values between zero and 1. Expects a Float. Default 0.
-  penumbra: (light:THREE.SpotLight, value: number) => { 
-    light.penumbra = value;
-  },
+ 
   castShadow: (light:THREE.Light, value: boolean) => {
     light.castShadow = value;
   },
-  // Numeric value of the light's strength/intensity. Expects a Float. Default 1.
-  intensity: (light:THREE.Light, value: number) => {
-    light.intensity = value;
-  },
-  // Hexadecimal color of the light. Default 0xffffff (white).
+    // Hexadecimal color of the light. Default 0xffffff (white).
   //  | THREE.SpotLight | THREE.AmbientLight | THREE.DirectionalLight
   color: (light:THREE.Light, value: number) => {
     light.color = new THREE.Color().setHex(value);
@@ -29,7 +20,20 @@ export const LightOptions: any = {
   // Maximum range of the light. Default is 0 (no limit). Expects a Float.
   distance: (light:THREE.SpotLight, value: number) => {
     light.distance = value;
-  }
+  },
+  // Numeric value of the light's strength/intensity. Expects a Float. Default 1.
+  intensity: (light:THREE.Light, value: number) => {
+    light.intensity = value;
+  },
+
+   // Percent of the SpotLight cone that is attenuated due to penumbra. Takes values between zero and 1. Expects a Float. Default 0.
+  penumbra: (light:THREE.SpotLight, value: number) => { 
+    light.penumbra = value;
+  },
+  position: (light:THREE.Light, value:number[]) => {
+    light.position.set(value[0], value[1], value[2]);
+    // light.position.set(...value);
+  },
 }
 
 export const LightShadowOptions: any = {
@@ -90,6 +94,10 @@ export class Light {
         }
       }
     })
+  }
+
+  public get() {
+    return this.light;
   }
 
   private createHelpers() {

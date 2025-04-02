@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
-
+// import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js'
 export class LoaderGLTF {
 
   private object!: GLTF;
@@ -39,16 +39,6 @@ export class LoaderGLTF {
     return this.object.scene.getObjectByName(name);
   }
 
-
-
-
-
-
-
-
-
-
-
   /*
   public async create(url: string) {
     const body = await this.loader(url);
@@ -71,19 +61,6 @@ export class LoaderGLTF {
   }
 
   */
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /*
   private loader(url: string) {

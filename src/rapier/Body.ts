@@ -37,23 +37,24 @@ export class Body {
     // 전달한 params에 추가적인 매개변수를 붙혀서 가져온다.
     colliderProps.create(params);
 
-    const rapierColliderDesc = new RapierColliderDesc();
-    const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(params.collider);
-   
-    
     const rapierRigidBodyDesc = new RapierRigidBodyDesc()
     const rigidBodyDesc = <RAPIER.RigidBodyDesc>rapierRigidBodyDesc.createRigidBodyFromOptions(params.body);
 
     this.rigidBody = this.rapier.world.createRigidBody(rigidBodyDesc);
-    this.collider = this.rapier.world.createCollider(colliderDesc, this.rigidBody);
-    
-    if(params.collider.onCollisionEnter) {
-      this.onCollisionEnter = params.collider.onCollisionEnter;
-      this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
-    }
-    
-    this.rapier.dynamicBodies.push(this);
 
+    if(params.collider) {
+      console.log('params.collider:', params.collider);
+      const rapierColliderDesc = new RapierColliderDesc();
+      const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(params.collider);
+      this.collider = this.rapier.world.createCollider(colliderDesc, this.rigidBody);
+      if(params.collider.onCollisionEnter) {
+        this.onCollisionEnter = params.collider.onCollisionEnter;
+        this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+      }
+      
+      this.rapier.dynamicBodies.push(this);
+
+    } 
     return this.rigidBody;
   }
 

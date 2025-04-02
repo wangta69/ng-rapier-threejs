@@ -54,8 +54,18 @@ export class World {
     return this;
   }
 
+  /**
+   * 
+   * @param helperProps 
+   * @deprecated
+   */
   public enableHelpers(helperProps?: any) {
-    this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
+    this.setGridHelper(helperProps)
+  }
+  public setGridHelper(helperProps?: any) {
+    helperProps.args = helperProps.args || [1000, 40, 0x303030, 0x303030];
+    this.helpers = new THREE.GridHelper( ...helperProps.args);
+    // this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
     this.helpers.position.x = helperProps.position.x || 0;
     this.helpers.position.y = helperProps.position.y || 0;
     this.helpers.position.z = helperProps.position.z || 0;
@@ -77,15 +87,17 @@ export class World {
   /**
    * 
    * @param rendererProps { antialias, alpha }
-   * @param params {pixelRatio, size:[]}
+   * @param params {pixelRatio, size:[],toneMapping, shadowMap }
    * @returns 
    */
-  public setRenderer(rendererProps: RendererProps, property?: any) {
+  // public setRenderer(rendererProps: RendererProps, property?: any) {
+  public setRenderer(rendererProps: any, property?: any) {
     // this.renderer = new THREE.WebGLRenderer( rendererProps ).setProperty();
     property = property || {};
-    
+  
     property.size = property.size || [this.screen.width, this.screen.height];
     property.pixelRatio = property.pixelRatio || window.devicePixelRatio;
+
     const renderer = new Renderer().WebGLRenderer( rendererProps).setProperty(
       property
     );

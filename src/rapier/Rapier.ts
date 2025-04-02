@@ -25,7 +25,7 @@ export class Rapier {
     // st hit = this.world.castRay(ray, 10, false); 
   }
 
-  public async initRapier(x: number, y: number, z: number):Promise<Rapier> { // Promise<Rapier> 
+  public async initRapier(x: number = 0.0, y: number = -9.81, z: number = 0.0):Promise<Rapier> { // Promise<Rapier> 
 
     await RAPIER.init(); // This line is only needed if using the compat version
     this.removeAll();
