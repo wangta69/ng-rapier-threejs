@@ -100,6 +100,9 @@ export class Light {
     return this.light;
   }
 
+  /**
+   * helper 는 별도로 분리 예정
+   */
   private createHelpers() {
     switch(this.lightProps.type) {
       // case 'ambient':

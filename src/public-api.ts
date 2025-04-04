@@ -30,5 +30,5 @@ export {LensFlare} from './threejs/addons/LensFlare';
 export {LoaderGLTF} from './threejs/addons/LoaderGLTF';
 export {LoaderObj} from './threejs/addons/LoaderObj';
 export {LoaderRGBE} from './threejs/addons/LoaderRGBE';
-
+export {_vector3, _vector2, _euler, _quaternion, _object3d, _matrix4, _raycaster} from './threejs/lib/constans';
 

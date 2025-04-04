@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
+import RAPIER from '@dimforge/rapier3d-compat';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {Light} from './lib/Light';
-import {Mesh, Tmesh} from './Mesh';
+import {Mesh, Tmesh, Tobj} from './Mesh';
 import {Renderer, RendererProps} from './lib/Renderer';
+import {Rapier} from '../rapier/Rapier';
+import {Tcollider} from '../rapier/Body';
 interface CameraProps {
   fov?: number, 
   aspect?: number, 
@@ -43,14 +46,15 @@ export class World {
   public camera!:THREE.PerspectiveCamera; 
   private screen = {width: 0, height: 0};
 
-  constructor() {}
+  public rapier!:Rapier;
+  constructor(rapier: Rapier) { // rapier: Rapier
+    this.rapier = rapier;
+  }
 
   public setContainer(container:HTMLElement) {
     this.container = container;
     return this;
   }
-
-
 
   public enableControls(controlProps?:any) {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -81,12 +85,15 @@ export class World {
     return this;
   }
 
-  public setScreen(screenProps?: ScreenProps) {
-
-    let {width, height} = screenProps || {width: window.innerWidth, height: window.innerWidth};
-
+  /**
+   * Set screen width and height, default is window.innerWidth, window.innerHeight
+   * @param screenProps 
+   * @returns World
+   */
+  public setScreen(screenProps?: ScreenProps): World {
+    let {width, height} = screenProps || {width: window.innerWidth, height: window.innerHeight};
     width = width || window.innerWidth;
-    height = height || window.innerWidth;
+    height = height || window.innerHeight;
 
     this.screen = {width, height};
     return this;
@@ -136,6 +143,8 @@ export class World {
   public onResize() {
     this.setScreen();
     this.renderer.setSize( this.screen.width, this.screen.height ); 
+    this.camera.aspect = this.screen.width / this.screen.height;
+    this.camera.updateProjectionMatrix()
   }
     
   /**
@@ -158,6 +167,7 @@ export class World {
   public setLight(lightProp: any, callback?:(light: Light)=>void) {  
     const light = new Light(lightProp);
     this.scene.add(light.light);
+    
     if(lightProp.helper) {
       this.scene.add( light.helper );
     }
@@ -178,12 +188,6 @@ export class World {
     });
     this.scene.add( holder);
     return this;
-  }
-
-  public async addMesh(props: Tmesh) {
-    const mesh = await new Mesh().create(props);
-    this.scene.add(mesh);
-    return mesh;
   }
 
   public clear() {
@@ -209,5 +213,78 @@ export class World {
   public update = () => {
     this.render();
     requestAnimationFrame(this.update); // request next update
+  }
+
+  public enableRapier(callback:(rapier: Rapier)=>void) {
+    // this.rapier = new Rapier(this);
+    this.rapier.threeJsWorld = this;
+    callback(this.rapier);
+    return this;
+  }
+
+  /**
+ * 
+ * @param props 
+ * @param callback 
+ * @returns 
+ * @deprecated  use addObject
+ */
+  public async addMesh(props: Tmesh) {
+    const mesh:THREE.Mesh = await new Mesh().create(props);
+    this.scene.add(mesh);
+    return mesh;
+  }
+
+  /**
+   * create threejs mesh and rapier body same time
+   * @param props 
+   * @param callback 
+   * @returns 
+   */
+  public async addObject(props: Tmesh, callback?:(mesh?:THREE.Mesh, body?:RAPIER.RigidBody)=>void) {
+    const mesh:THREE.Mesh = await new Mesh().create(props);
+    this.scene.add(mesh);
+    let body;
+    if(props.rapier) {
+      props.rapier.object3d = mesh;
+      body = await this.rapier.createBody(props.rapier);
+    }
+
+    this.scene.add(mesh);
+    if(callback) {
+      callback(mesh, body);
+    }
+    return this;
+  }
+
+  public async addObjectFromObjFile(props: Tobj, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:RAPIER.RigidBody)=>void) {
+   const mesh = await new Mesh().loadObj(props);
+
+    this.scene.add(mesh);
+    let body;
+    if(props.rapier) {
+      props.rapier.object3d = mesh;
+      body = await this.rapier.createBody(props.rapier);
+    }
+
+    this.scene.add(mesh);
+    if(callback) {
+      callback(mesh, body);
+    }
+    return this;
+  }
+
+  /**
+   * crete only rapier body
+   * @param props 
+   * @param callback 
+   * @returns 
+   */
+  public async addRapierBody(props:Tcollider, callback?:(body:RAPIER.RigidBody)=>void) {
+    const body = await this.rapier.createBody(props);
+    if(callback) {
+      callback(body);
+    }
+    return this;
   }
 }

@@ -13,7 +13,7 @@ import {RapierDebugRenderer} from './RapierDebugRenderer';
 export class Rapier {
   public world!: RAPIER.World;
   // public rigidBody: RigidBody;
-  private threeJsWorld: ThreeJsWorld;
+  public threeJsWorld!: ThreeJsWorld;
   // public dynamicBodies: [THREE.Object3D, RAPIER.RigidBody][] = [];
   public dynamicBodies: Body[] = [];
   public eventQueue!: RAPIER.EventQueue;
@@ -22,16 +22,17 @@ export class Rapier {
    * 
    * @param args 
    */
-  constructor(world: ThreeJsWorld) {
-    this.threeJsWorld = world;
+  constructor() { // world: ThreeJsWorld
+    // this.threeJsWorld = world;
     // this.eventQueue = new RAPIER.EventQueue(true);
     // this.rigidBody = rigidBody;
     // st hit = this.world.castRay(ray, 10, false); 
+    RAPIER.init(); // This line is only needed if using the compat version
   }
-
+  /*
   public async initRapier(x: number = 0.0, y: number = -9.81, z: number = 0.0):Promise<Rapier> { // Promise<Rapier> 
 
-    await RAPIER.init(); // This line is only needed if using the compat version
+  
     this.removeAll();
     
     if(!this.world) {
@@ -42,9 +43,18 @@ export class Rapier {
     }
 
     this.eventQueue = new RAPIER.EventQueue(true);
-    
+   
+    return this;
+  } */
+
+  public async init(gravity: number[] = [0.0, -9.81, 0.0]) {
+    this.removeAll();
+    this.world = new RAPIER.World( new RAPIER.Vector3(gravity[0], gravity[1], gravity[2]));
+    this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
+    this.eventQueue = new RAPIER.EventQueue(true);
     return this;
   }
+  
 
   public enableRapierDebugRenderer() {
     this.rapierDebugRenderer = new RapierDebugRenderer(this.threeJsWorld.scene, this.world)
@@ -71,8 +81,11 @@ export class Rapier {
     for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
       this.dynamicBodies[i].remove();
     }
-
     this.dynamicBodies = [];
+  }
+
+  public async createBody(props: any) {
+    return await new Body(this).create(props);
   }
 }
 

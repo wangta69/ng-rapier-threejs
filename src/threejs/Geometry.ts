@@ -2,10 +2,10 @@ import * as THREE from "three";
 
 export type IGeometry = 
   THREE.BoxGeometry | 
-    THREE.SphereGeometry | 
-    THREE.CylinderGeometry | 
-    THREE.IcosahedronGeometry |
-    THREE.TorusKnotGeometry
+  THREE.SphereGeometry | 
+  THREE.CylinderGeometry | 
+  THREE.IcosahedronGeometry |
+  THREE.TorusKnotGeometry
 
 export class Geometry {
   constructor() {

@@ -1,0 +1,26 @@
+import * as THREE from "three";
+
+export class LightHelper {
+
+  public helper!: THREE.HemisphereLightHelper | THREE.DirectionalLightHelper | THREE.PointLightHelper | THREE.SpotLightHelper ;
+
+  private createHelpers(light, helperProps: any) {
+    switch(helperProps.type) {
+      // case 'ambient':
+      //   this.helper = new THREE.AmbientLightHelper(this.light, 0.1);
+      //   break;
+      case 'hemisphere':
+        this.helper = new THREE.HemisphereLightHelper(<THREE.HemisphereLight>light, 0.1);
+        break;
+      case 'directional':
+        this.helper = new THREE.DirectionalLightHelper(<THREE.DirectionalLight>light, 0.1);
+        break;
+      case 'point':
+        this.helper = new THREE.PointLightHelper(<THREE.PointLight>light, 0.1);
+        break;
+      case 'spot':
+        this.helper = new THREE.SpotLightHelper(<THREE.SpotLight>light, 0.1);
+        break;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "ng-rapier-threejs",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "peerDependencies":{
     "@dimforge/rapier3d": "^0.14.0",
     "@dimforge/rapier3d-compat": "^0.14.0",

@@ -34,7 +34,7 @@ export class Body {
    * 
    * @param args = {object3d, collider}
    */
-  public async create(params: Tcollider) {
+  public async create(params: Tcollider): Promise<RAPIER.RigidBody> {
 
 
     this.object3d = params.object3d;
@@ -77,9 +77,6 @@ export class Body {
       this.object3d.quaternion.copy(this.rigidBody.rotation());
     }
     if(typeof this.onCollisionEnter === 'function') {
-     
-      
-      
       // this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
       this.rapier.eventQueue.drainCollisionEvents((_, __, started) => {
         if (started) {
