@@ -27,7 +27,57 @@ restrictRotations(rotationsEnabledX: boolean, rotationsEnabledY: boolean, rotati
 lockRotations(): RigidBodyDesc;
 */
 
-const RigidBodyOptions: any = {
+// export type keyTrigidBodyProps = {
+//   additionalMass: string,
+//   additionalSolverIterations: string,
+//   angularDamping: string,
+//   angvel: string,
+//   canSleep: string,
+//   ccdEnabled: string,
+//   dominanceGroup: string,
+//   enabled: string,
+//   gravityScale: string,
+//   linearDamping: string,
+//   linvel: string,
+//   rotation: string,
+//   sleeping: string,
+//   softCcdPrediction: string,
+//   translation: string,
+//   userData: string,
+// }
+
+// export type rigidBodyPropsKey =
+//   'additionalMass' | 'additionalSolverIterations'|'angularDamping'|'angvel'|'canSleep'|
+//   'ccdEnabled'|'dominanceGroup'|'enabled'| 'gravityScale'|'linearDamping'|'linvel'|'rotation'|'sleeping'|'softCcdPrediction'|
+//   'translation'|'userData';
+
+
+export type TrigidBodyProps = {
+  additionalMass?: number,
+  additionalSolverIterations?: number,
+  angularDamping?: number,
+  angvel?: THREE.Vector3,
+  canSleep?: boolean,
+  ccdEnabled?: boolean,
+  dominanceGroup?: number,
+  enabled?: boolean,
+  enabledRotations?: boolean[],
+  gravityScale?: number,
+  linearDamping?: number,
+  linvel?: THREE.Vector3,
+  rotation?: THREE.Quaternion,
+  sleeping?: boolean,
+  softCcdPrediction?: number,
+  translation?: THREE.Vector3 | number[],
+  userData?: any,
+
+  type?: string
+}
+
+
+// const RigidBodyOptions: TrigidBodyProps = {
+// const RigidBodyOptions: any = {
+const RigidBodyOptions: {[key: string]: (rigidbody:RigidBodyDesc, value: any) => void} = {
   additionalMass: (rigidbody:RigidBodyDesc, value: number) => {
     rigidbody.setAdditionalMass(value);
   },
@@ -52,6 +102,9 @@ const RigidBodyOptions: any = {
   enabled: (rigidbody:RigidBodyDesc, value: boolean) => {
     rigidbody.setEnabled(value);
   },
+  enabledRotations: (rigidbody:RigidBodyDesc, value: boolean[]) => {
+    rigidbody.enabledRotations(value[0], value[1], value[2] );
+  },
   gravityScale: (rigidbody:RigidBodyDesc, value: number) => {
     rigidbody.setGravityScale(value);
   },
@@ -73,9 +126,6 @@ const RigidBodyOptions: any = {
   translation: (rigidbody:RigidBodyDesc, value: THREE.Vector3 | number[]) => {
     if(Array.isArray(value)){
       rigidbody.setTranslation(value[0],  value[1], value[2]);
-      // const v = value as const;
-      // rigidbody.setTranslation(...value);
-      // rigidbody.setTranslation(...(value as const));
     } else {
       rigidbody.setTranslation(value.x,  value.y, value.z);
     }

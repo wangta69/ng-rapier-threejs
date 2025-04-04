@@ -18,7 +18,7 @@
 // 아래부터 실제 프로그램에서 사용할 예정
 export {Rapier} from './rapier/Rapier';
 export {World} from './threejs/World';
-
+export type {ClockProps} from './threejs/World';
 export {Body} from './rapier/Body';
 
 export {Mesh} from './threejs/Mesh';

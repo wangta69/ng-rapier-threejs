@@ -378,3 +378,33 @@ class Car {
 - - phong: MeshPhongMaterial
 - - standard: MeshStandardMaterial
 
+## Animation
+### Three World
+- this.world.update(); : three.js 의 world 를 업데이트 합니다.
+```
+  public render() {
+    const clock = {delta: this.clock.getDelta(), elapsedTime:this.clock.getElapsedTime()}
+    if(this.controls) {
+      this.controls.update();
+    }
+    this.updates.forEach((fnc:(clock: ClockProps) => void)=>{
+      fnc(clock);
+    })
+    this.renderer.render( this.scene, this.camera );
+  }
+
+```
+
+- 추가적인 update를 원할 경우  this.world.updates.push((clock:any)=>{this.update(clock)}); 처럼 사용하면됩니다.
+
+### rapier update
+> rapier에서는 생성된 dynamic Body를 자동적으로 업데이트 합니다.
+```
+private update(clock: ClockProps) {
+  ..........
+
+  for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
+    this.dynamicBodies[i].update(clock);
+  }
+}
+```

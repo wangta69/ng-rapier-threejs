@@ -38,13 +38,67 @@ export type ColliderShape =
   | "roundConvexHull"
   | "roundConvexMesh";
 
+//   export declare enum ActiveEvents {
+//     NONE = 0,
+//     /**
+//      * Enable collision events.
+//      */
+//     COLLISION_EVENTS = 1,
+//     /**
+//      * Enable contact force events.
+//      */
+//     CONTACT_FORCE_EVENTS = 2
+// }
+
+  export type TcolliderProps = {
+    activeCollisionTypes?: number,
+    activeEvents?: string,
+    activeHooks?: number,
+    // collisionGroups?: number[],
+    collisionGroups?:number[] | [number | [], number[]]
+    contactForceEventThreshold?: number,
+    contactSkin?: number,
+    density?: number,
+    enabled?: boolean,
+    friction?: number,
+    frictionCombineRule?: any,
+    mass?: number,
+    restitution?: number,
+    restitutionCombineRule?: number,
+    rotation?: THREE.Quaternion,
+    sensor?: boolean,
+    solverGroups?: number,
+    translation?: number[] | THREE.Vector3,
+
+    // 
+    args?: number[]
+    shape?: string,
+    onCollisionEnter?: any,
+  }
+
+
+  type TactiveEvents = {
+    NONE: ActiveEvents,
+    /**
+     * Enable collision events.
+     */
+    COLLISION_EVENTS: ActiveEvents,
+    /**
+     * Enable contact force events.
+     */
+    CONTACT_FORCE_EVENTS: ActiveEvents,
+
+
+  }
 
 const ColliderOptions: any = {
   activeCollisionTypes: (collider:ColliderDesc, value: number) => {
     collider.setActiveCollisionTypes(value);
   },
-  activeEvents: (collider:ColliderDesc, value: ActiveEvents) => {
-    collider.setActiveEvents(value);
+  activeEvents: (collider:ColliderDesc, value: string) => { // value: ActiveEvents
+    // collider.setActiveEvents(ActiveEvents[value as keyof ActiveEvents]);
+    // collider.setActiveEvents((ActiveEvents as { [key: string]: any })[value as keyof ActiveEvents]);
+    collider.setActiveEvents((ActiveEvents as { [key: string]: any })[value]);
   },
   activeHooks: (collider:ColliderDesc, value: number) => {
     collider.setActiveHooks(value);
@@ -92,8 +146,13 @@ const ColliderOptions: any = {
   solverGroups: (collider:ColliderDesc, value: number) => {
     collider.setSolverGroups(value);
   },
-  translation: (collider:ColliderDesc, value: THREE.Vector3) => {
-    collider.setTranslation(value.x, value.y, value.z);
+  translation: (collider:ColliderDesc, value: number[] | THREE.Vector3) => {
+    if(Array.isArray(value)){
+      collider.setTranslation(value[0],  value[1], value[2]);
+    } else {
+      collider.setTranslation(value.x, value.y, value.z);
+    }
+    
   }
 };
 

@@ -23,9 +23,19 @@ export class EventListener {
 
   public onMouseMove: any[] = []; // {document: fn}
   public onMouseWheel: any[] = [];
+  public windowResize: any[] = [];
+
   public activeMouseMove(renderer: WebGLRenderer) {
     document.addEventListener('click', () => {
       renderer.domElement.requestPointerLock()
+    })
+  }
+
+  public activeWindowResize() {
+    window.addEventListener('resize', () => {
+      this.windowResize.forEach(fn =>{
+        fn.bind(this)();
+      } )
     })
   }
 
@@ -72,14 +82,12 @@ export class EventListener {
 
     this.onMouseMove.forEach(fn =>{
       fn.renderer.bind(this)(e);
-      // console.log(fn.renderer.bind(this)(e));
     } )
   }
 
   private onDocumentMouseWheel(e: MouseEvent) {
     this.onMouseWheel.forEach(fn =>{
       fn.renderer.bind(this)(e);
-      // console.log(fn.renderer.bind(this)(e));
     } )
   }
 
@@ -97,6 +105,10 @@ export class EventListener {
    */
   public addMouseWeelEvent(fn: any) {
     this.onMouseWheel.push(fn);
+  }
+
+  public addWindowResize(fn: any) {
+    this.windowResize.push(fn);
   }
 
 }

@@ -74,10 +74,6 @@ export class Renderer {
         parameters[key] = rendererProps[key];
       }
     });
-
-    console.log('parameters:', parameters);
- 
-
     this.renderer = new WebGLRenderer( parameters );
     return this;
   };

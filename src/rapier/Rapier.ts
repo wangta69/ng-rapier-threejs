@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
 
-import { World as  ThreeJsWorld} from '../threejs/World';
+import { World as  ThreeJsWorld, ClockProps} from '../threejs/World';
+import { Body} from './Body';
 import {RapierDebugRenderer} from './RapierDebugRenderer';
 // import {RigidBody} from './RigidBody';
 
@@ -14,8 +15,8 @@ export class Rapier {
   // public rigidBody: RigidBody;
   private threeJsWorld: ThreeJsWorld;
   // public dynamicBodies: [THREE.Object3D, RAPIER.RigidBody][] = [];
-  public dynamicBodies: any[] = [];
-
+  public dynamicBodies: Body[] = [];
+  public eventQueue!: RAPIER.EventQueue;
   public rapierDebugRenderer!: RapierDebugRenderer;
   /**
    * 
@@ -23,6 +24,7 @@ export class Rapier {
    */
   constructor(world: ThreeJsWorld) {
     this.threeJsWorld = world;
+    // this.eventQueue = new RAPIER.EventQueue(true);
     // this.rigidBody = rigidBody;
     // st hit = this.world.castRay(ray, 10, false); 
   }
@@ -38,6 +40,9 @@ export class Rapier {
   
       this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
     }
+
+    this.eventQueue = new RAPIER.EventQueue(true);
+    
     return this;
   }
 
@@ -46,14 +51,14 @@ export class Rapier {
     return this;
   }
 
-  private update(clock: THREE.Clock) {
+  private update(clock: ClockProps) {
     
-    const delta = clock.getDelta();
-    this.world.timestep = Math.min(delta, 0.1);
-    this.world.step();
-
+    this.world.timestep = Math.min(clock.delta, 0.1);    
+    // this.world.step();
+    this.world.step(this.eventQueue);
+    
     for (let i = 0, n = this.dynamicBodies.length; i < n; i++) {
-      this.dynamicBodies[i].update(clock.elapsedTime);
+      this.dynamicBodies[i].update(clock);
     }
 
     if(this.rapierDebugRenderer && this.rapierDebugRenderer.enabled) {

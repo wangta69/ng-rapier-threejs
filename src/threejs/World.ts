@@ -17,6 +17,11 @@ interface ScreenProps {
   height?: number
 }
 
+export interface ClockProps {
+  delta: number, 
+  elapsedTime:number
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -69,9 +74,9 @@ export class World {
     helperProps.args = helperProps.args || [1000, 40, 0x303030, 0x303030];
     this.helpers = new THREE.GridHelper( ...helperProps.args);
     // this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
-    this.helpers.position.x = helperProps.position.x || 0;
-    this.helpers.position.y = helperProps.position.y || 0;
-    this.helpers.position.z = helperProps.position.z || 0;
+    this.helpers.position.x = helperProps.position?.x || 0;
+    this.helpers.position.y = helperProps.position?.y || 0;
+    this.helpers.position.z = helperProps.position?.z || 0;
     this.scene.add( this.helpers );
     return this;
   }
@@ -150,11 +155,14 @@ export class World {
   //   return this;
   // }
 
-  public setLight(lightProp: any) {  
+  public setLight(lightProp: any, callback?:(light: Light)=>void) {  
     const light = new Light(lightProp);
     this.scene.add(light.light);
     if(lightProp.helper) {
       this.scene.add( light.helper );
+    }
+    if(callback) {
+      callback(light);
     }
     return this;
   }
@@ -185,14 +193,14 @@ export class World {
 
   public render() {
 
-    // const delta = this.clock.getDelta();
-    // const elapsedTime = this.clock.getElapsedTime();
+    const clock = {delta: this.clock.getDelta(), elapsedTime:this.clock.getElapsedTime()}
+
     if(this.controls) {
       this.controls.update();
     }
 
-    this.updates.forEach((fnc:(body: any) => void)=>{
-      fnc(this.clock);
+    this.updates.forEach((fnc:(clock: ClockProps) => void)=>{
+      fnc(clock);
     })
 
     this.renderer.render( this.scene, this.camera );
