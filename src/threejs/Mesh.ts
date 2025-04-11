@@ -23,6 +23,37 @@ export type Tobj = {
   rapier?: any
 }
 
+const MeshOptions: any = {
+  position: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+    if(Array.isArray(value)){
+      mesh.position.set(value[0],  value[1], value[2]);
+    } else {
+      mesh.position.set(value.x, value.y, value.z);
+    }
+  },
+  scale: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+    if(Array.isArray(value)){
+      mesh.scale.set(value[0],  value[1], value[2]);
+    } else {
+      mesh.scale.set(value.x, value.y, value.z);
+    }
+  },
+  rotation: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+    if(Array.isArray(value)){
+      mesh.rotation.set(value[0],  value[1], value[2]);
+    } else {
+      mesh.rotation.set(value.x, value.y, value.z);
+    }
+  },
+  castShadow: (mesh:THREE.Mesh, value: boolean) => {
+    mesh.castShadow = value;
+  },
+  receiveShadow: (mesh:THREE.Mesh, value: boolean) => {
+    mesh.receiveShadow = value;
+  }
+};
+
+
 export class Mesh {
   public mesh!: THREE.Object3D | THREE.Mesh;
   // public geometry!: IGeometry;
@@ -101,10 +132,11 @@ export class Mesh {
 
   private createMesh(geometry: any, material: any, args: any):THREE.Mesh {
     const mesh = new THREE.Mesh( geometry, material);
-    if(args.position) mesh.position.set(args.position.x, args.position.y, args.position.z);
-    if(args.scale) mesh.scale.set(args.scale.x, args.scale.y, args.scale.z);
-    if(args.castShadow) mesh.castShadow = true;
-    if(args.receiveShadow) mesh.receiveShadow = true;
+    Object.keys(args).forEach((key: any) =>{
+      if(key in MeshOptions) {
+        MeshOptions[key](mesh, args[key]);
+      }
+    });
 
     return mesh
   }

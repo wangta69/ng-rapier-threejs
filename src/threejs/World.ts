@@ -6,7 +6,7 @@ import {Light} from './lib/Light';
 import {Mesh, Tmesh, Tobj} from './Mesh';
 import {Renderer, RendererProps} from './lib/Renderer';
 import {Rapier} from '../rapier/Rapier';
-import {Tcollider} from '../rapier/Body';
+import {Tcollider, Body} from '../rapier/Body';
 interface CameraProps {
   fov?: number, 
   aspect?: number, 
@@ -31,7 +31,6 @@ export interface ClockProps {
 })
 export class World {
 
- 
   private container: any;
   public scene = new THREE.Scene();
   private clock = new THREE.Clock();
@@ -196,7 +195,7 @@ export class World {
   }
 
   public render() {
-
+   
     const clock = {delta: this.clock.getDelta(), elapsedTime:this.clock.getElapsedTime()}
 
     if(this.controls) {
@@ -204,6 +203,8 @@ export class World {
     }
 
     this.updates.forEach((fnc:(clock: ClockProps) => void)=>{
+
+      // console.log(this.updates)
       fnc(clock);
     })
 
@@ -241,23 +242,30 @@ export class World {
    * @param callback 
    * @returns 
    */
-  public async addObject(props: Tmesh, callback?:(mesh?:THREE.Mesh, body?:RAPIER.RigidBody)=>void) {
-    const mesh:THREE.Mesh = await new Mesh().create(props);
+  public async addObject(props: Tmesh, callback?:(mesh?:THREE.Mesh, body?:Body)=>void) {
+    // console.log('name:',props.rapier.body.userData.name);
+    const mesh:THREE.Mesh = await new Mesh().create({geometry: props.geometry, material: props.material, mesh: props.mesh});
+
     this.scene.add(mesh);
-    let body;
+    let body:Body;
     if(props.rapier) {
       props.rapier.object3d = mesh;
       body = await this.rapier.createBody(props.rapier);
+
+      if(callback) {
+        callback(mesh, body);
+      }
+    } else {
+      if(callback) {
+        callback(mesh);
+      }
     }
 
-    this.scene.add(mesh);
-    if(callback) {
-      callback(mesh, body);
-    }
+    
     return this;
   }
 
-  public async addObjectFromObjFile(props: Tobj, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:RAPIER.RigidBody)=>void) {
+  public async addObjectFromObjFile(props: Tobj, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
    const mesh = await new Mesh().loadObj(props);
 
     this.scene.add(mesh);
@@ -280,7 +288,7 @@ export class World {
    * @param callback 
    * @returns 
    */
-  public async addRapierBody(props:Tcollider, callback?:(body:RAPIER.RigidBody)=>void) {
+  public async addRapierBody(props:Tcollider, callback?:(body:Body)=>void) {
     const body = await this.rapier.createBody(props);
     if(callback) {
       callback(body);

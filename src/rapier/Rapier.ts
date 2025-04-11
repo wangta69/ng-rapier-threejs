@@ -23,10 +23,6 @@ export class Rapier {
    * @param args 
    */
   constructor() { // world: ThreeJsWorld
-    // this.threeJsWorld = world;
-    // this.eventQueue = new RAPIER.EventQueue(true);
-    // this.rigidBody = rigidBody;
-    // st hit = this.world.castRay(ray, 10, false); 
     RAPIER.init(); // This line is only needed if using the compat version
   }
   /*
@@ -55,7 +51,6 @@ export class Rapier {
     return this;
   }
   
-
   public enableRapierDebugRenderer() {
     this.rapierDebugRenderer = new RapierDebugRenderer(this.threeJsWorld.scene, this.world)
     return this;
@@ -84,8 +79,15 @@ export class Rapier {
     this.dynamicBodies = [];
   }
 
+  /**
+   * 
+   * @param props 
+   * @returns 
+   */
   public async createBody(props: any) {
-    return await new Body(this).create(props);
+    const bodyObj = await new Body(this)
+    bodyObj.create(props);
+    return bodyObj;
   }
 }
 

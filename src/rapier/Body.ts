@@ -34,8 +34,7 @@ export class Body {
    * 
    * @param args = {object3d, collider}
    */
-  public async create(params: Tcollider): Promise<RAPIER.RigidBody> {
-
+  public async create(params: Tcollider) { // : Promise<Body>
 
     this.object3d = params.object3d;
 
@@ -47,6 +46,9 @@ export class Body {
     const rapierRigidBodyDesc = new RapierRigidBodyDesc()
     const rigidBodyDesc = <RAPIER.RigidBodyDesc>rapierRigidBodyDesc.createRigidBodyFromOptions(params.body);
 
+    if(!this.rapier.world) {
+      console.error('rapier world not defined');
+    }
     this.rigidBody = this.rapier.world.createRigidBody(rigidBodyDesc);
 
     if(params.collider) {
@@ -60,10 +62,11 @@ export class Body {
         this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
       }
       
+      console.log(this.rigidBody, this.object3d);
       this.rapier.dynamicBodies.push(this);
 
     } 
-    return this.rigidBody;
+    // return this;
   }
 
   public remove() {
@@ -71,7 +74,6 @@ export class Body {
   }
 
   public update(clock: ClockProps) {
-    // this.rapier.world.timestep = Math.min(clock.delta, 0.1)
     if(this.object3d) {
       this.object3d.position.copy(this.rigidBody.translation());
       this.object3d.quaternion.copy(this.rigidBody.rotation());
