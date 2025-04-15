@@ -23,18 +23,17 @@ export class Body {
   public useFrame!: {(argument:any): void;};
   // private eventQueue: RAPIER.EventQueue;
 
-  private onCollisionEnter!: (args?:any) => void;
+  private onCollisionEnter!: (handle1?:number, handle2?: number) => void;
 
   constructor(rapier: Rapier) {
     this.rapier = rapier;
-    // this.eventQueue = new RAPIER.EventQueue(true);
   }
 
   /**
    * 
    * @param args = {object3d, collider}
    */
-  public async create(params: Tcollider) { // : Promise<Body>
+  public async create(params: Tcollider, callback?:(body?:Body)=>void) { // : Promise<Body>
 
     this.object3d = params.object3d;
 
@@ -49,23 +48,23 @@ export class Body {
     if(!this.rapier.world) {
       console.error('rapier world not defined');
     }
-    this.rigidBody = this.rapier.world.createRigidBody(rigidBodyDesc);
 
+    this.rigidBody = this.rapier.world.createRigidBody(rigidBodyDesc);
     if(params.collider) {
       const rapierColliderDesc = new RapierColliderDesc();
       const colliderDesc: RAPIER.ColliderDesc = <RAPIER.ColliderDesc>rapierColliderDesc.createShapeFromOptions(params.collider);
       this.collider = this.rapier.world.createCollider(colliderDesc, this.rigidBody);
-     
       if(params.collider.onCollisionEnter) {
         
         this.onCollisionEnter = params.collider.onCollisionEnter;
         this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
       }
-      
-      console.log(this.rigidBody, this.object3d);
       this.rapier.dynamicBodies.push(this);
-
     } 
+
+    if(callback) {
+      callback(this);
+    }
     // return this;
   }
 
@@ -80,16 +79,16 @@ export class Body {
     }
     if(typeof this.onCollisionEnter === 'function') {
       // this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-      this.rapier.eventQueue.drainCollisionEvents((_, __, started) => {
+      this.rapier.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
         if (started) {
-          this.onCollisionEnter();
+          this.onCollisionEnter(handle1, handle2);
           // this.rapier.world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
           //   const contactFid1 = manifold.contactFid1;
           //   const contactFid2 = manifold.contactFid2;
           //   this.onCollisionEnter();
           // });
         }
-      });
+      })
     
     }
     

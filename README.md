@@ -77,17 +77,6 @@ export class RapierSample2Component implements AfterViewInit {
 
       this.addRendererOption();
 
-
-      this.createFloorMesh();
-
-      this.createCubeMesh();
-      this.createSphereMesh();
-      this.createCylinderMesh();
-      this.createIcosahedronMesh(); 
-      this.createTorusKnotMesh();
-      this.createOBJLoader();
-
-      new Car(this, [0, 2, 0])
       this.stats = new Stats()
       document.body.appendChild(this.stats.dom)
       
@@ -99,161 +88,110 @@ export class RapierSample2Component implements AfterViewInit {
       physicsFolder.add(this.rapier.world.gravity, 'z', -10.0, 10.0, 0.1)
 
   }
+```
 
-  private async createFloorMesh() {
-  
-    const mesh = await new Mesh().create({
-      geometry: {type: 'box', args: [50, 1, 50]}, // geometry 속성
-      material: {type: 'phong'}, // material 속성
-      mesh: {receiveShadow: true}
-    });
+### 다양한 mesh 생성
+#### BoxGeometry
+##### mesh 및 rapier collider를 각각 생성하여 결합하는 방식
+```
+const mesh = await new Mesh().create({
+  geometry: {type: 'box', args: [50, 1, 50]}, // geometry 속성
+  material: {type: 'phong'}, // material 속성
+  mesh: {receiveShadow: true}
+});
 
-    this.world.scene.add(mesh);
+this.world.scene.add(mesh);
 
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type: 'fixed', translation: new THREE.Vector3(0, -1, 0)},
-      collider: {shape: 'cuboid', args:[25, 0.5, 25]},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
+// Rapier 생성
+const body: Body = new Body(this.rapier);
+await body.create({
+  body: {type: 'fixed', translation: new THREE.Vector3(0, -1, 0)},
+  collider: {shape: 'cuboid', args:[25, 0.5, 25]},
+  object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
+});
+```
+##### mesh 및 rapier collider를 한번에 생성하는 방식
+> 한번에 생성할 경우는 별도의 scene.add 이 필요없습니다.
+```
+await this.world.addObject({
+  geometry: {type: 'box', args: [50, 1, 50]}, // geometry 속성
+  material: {type: 'phong'}, // material 속성
+  mesh: {receiveShadow: true},
+  rapier: {
+    body: {type: 'fixed', translation: new THREE.Vector3(0, -1, 0)},
+    collider: {shape: 'cuboid', args:[25, 0.5, 25]},
   }
+}, (mesh, body) => {
+    console.log('mesh:', mesh);
+    console.log('body:', body);
+  });
+```
 
-  private async createCubeMesh() {
-  
-    const mesh = await new Mesh().create({
-      geometry: {type: 'box', args: [1, 1, 1]}, // geometry 속성
-      material: {type: 'normal'}, // material 속성
-      mesh: { castShadow: true}
-    });
-    this.world.scene.add(mesh);
-
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type:'dynamic', translation:new THREE.Vector3(0, 5, 0), canSleep: false},
-      collider: {mass:1, restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
+#### SphereGeometry
+```
+await this.world.addObject({
+  geometry: {type: 'sphere'}, // geometry 속성
+  material: {type: 'normal'}, // material 속성
+  mesh: {receiveShadow: true},
+  rapier:{
+    body: {type:'dynamic', translation: new THREE.Vector3(-2.5, 5, 0), canSleep: false},
+    collider: {shape: 'ball', restitution: 0.5},
   }
-
-  private async createSphereMesh() {
-  
-    const mesh = await new Mesh().create({
-      geometry: {type: 'sphere'}, // geometry 속성
-      material: {type: 'normal'}, // material 속성
-      mesh: {receiveShadow: true}
-    });
-
-    this.world.scene.add(mesh);
-
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type:'dynamic', translation: new THREE.Vector3(-2.5, 5, 0), canSleep: false},
-      collider: {shape: 'ball', restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
+});
+```
+#### CylinderGeometry
+```
+await this.world.addObject({
+  geometry: {type: 'cylinder', args: [1, 1, 2, 16]}, // geometry 속성
+  material: {type: 'normal'}, // material 속성
+  mesh: {castShadow: true},
+  rapier:{
+    body: {type:'dynamic', translation: new THREE.Vector3(0, 5, 0), canSleep: false},
+    collider: {shape: 'cylinder', mass:1, restitution: 0.5},
   }
+});
+```
 
-  private async createCylinderMesh() {
-    const mesh = await new Mesh().create({
-      geometry: {type: 'cylinder', args: [1, 1, 2, 16]}, // geometry 속성
-      material: {type: 'normal'}, // material 속성
-      mesh: {castShadow: true}
-    });
-
-    this.world.scene.add(mesh);
-
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type:'dynamic', translation: new THREE.Vector3(0, 5, 0), canSleep: false},
-      collider: {shape: 'cylinder', mass:1, restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
+#### IcosahedronGeometry
+```
+await this.world.addObject({
+  geometry: {type: 'icosahedron', args: [1, 0]}, // geometry 속성
+  material: {type: 'normal'}, // material 속성
+  mesh: {receiveShadow: true},
+  rapier:{
+    body: {type:'dynamic', translation:new THREE.Vector3(2.5, 5, 0), canSleep: false},
+    collider: {shape: 'convexHull', mass:1, restitution: 0.5}
   }
+});
+```
 
-  private async createIcosahedronMesh() {
-      
-    const mesh = await new Mesh().create({
-      geometry: {type: 'icosahedron', args: [1, 0]}, // geometry 속성
-      material: {type: 'normal'}, // material 속성
-      mesh: {receiveShadow: true}
-    });
-
-    this.world.scene.add(mesh);
-
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type:'dynamic', translation:new THREE.Vector3(2.5, 5, 0), canSleep: false},
-      collider: {shape: 'convexHull', mass:1, restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
+#### TorusKnotGeometry
+```
+await this.world.addObject({
+  geometry: {type: 'torusknot'}, // geometry 속성
+  material: {type: 'normal'}, // material 속성
+  mesh: {receiveShadow: true},
+  rapier:{
+    body: {type:'dynamic', translation:new THREE.Vector3(5, 5, 0)},
+    collider: {shape: 'trimesh', mass:1, restitution: 0.5},
   }
+});
+```
 
-  private async createTorusKnotMesh() {
-        
-    const mesh = await new Mesh().create({
-      geometry: {type: 'torusknot'}, // geometry 속성
-      material: {type: 'normal'}, // material 속성
-      mesh: {receiveShadow: true}
-    });
-
-    this.world.scene.add(mesh);
-
-    // Rapier 생성
-    const body: Body = new Body(this.rapier);
-    await body.create({
-      body: {type:'dynamic', translation:new THREE.Vector3(5, 5, 0)},
-      collider: {shape: 'trimesh', mass:1, restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
-  }
-
-  private async createOBJLoader() {
-    const mesh = await new Mesh().loadObj({
-      material: {type: 'normal'}, // material 속성
-      mesh: {castShadow: true, url: '/assets/suzanne.obj', name: 'Suzanne'}
-    });
-
-    this.world.scene.add(mesh);
-
-    const body: Body = new Body(this.rapier);
-    await body.create({
+#### OBJLoader
+```
+await this.world.addObjectFromObjFile({
+    material: {type: 'normal'}, // material 속성
+    mesh: {url: '/assets/suzanne.obj', castShadow: true, name: 'Suzanne'},
+    rapier:{
       body: {type:'dynamic', translation:new THREE.Vector3(-1, 10, 0)},
-      collider: {shape: 'trimesh', mass:1, restitution: 0.5},
-      object3d: mesh // 위에서 생성한 ThreeJs의 mesh를 넣어주면 mesh의 속성(shape, postion, scale등등을 자동으로 처리합니다 )
-    });
-  }
-
-  private addRendererOption() {
-      // this.renderer = new THREE.WebGLRenderer({antialias: true}); // renderer with transparent backdrop
-      this.world.renderer.setSize(window.innerWidth, window.innerHeight)
-      this.world.renderer.shadowMap.enabled = true
-      this.world.renderer.shadowMap.type = THREE.VSMShadowMap
-  
-      this.world.renderer.domElement.addEventListener('click', (e) => {
-  
-        this.mouse.set(
-          (e.clientX / this.world.renderer.domElement.clientWidth) * 2 - 1,
-          -(e.clientY / this.world.renderer.domElement.clientHeight) * 2 + 1
-        )
-        this.raycaster.setFromCamera(this.mouse, this.world.camera)
-        const intersects = this.raycaster.intersectObjects(
-          this.rapier.dynamicBodies.flatMap((a) => a.object3d), // , sphereMesh, cylinderMesh, icosahedronMesh, torusKnotMesh
-          false
-        )
-        if (intersects.length) {
-          this.rapier.dynamicBodies.forEach((b) => {
-            b.object3d === intersects[0].object && b.rigidBody.applyImpulse(new RAPIER.Vector3(0, 10, 0), true)
-          })
-        }
-      })
-  }
+    collider: {shape: 'trimesh', mass:1, restitution: 0.5},
+    }
+  });
 }
-
+```
+#### GLTFLoader
+```
 class Car {
   dynamicBodies: any = []
   private game: RapierSample2Component;
@@ -407,4 +345,23 @@ private update(clock: ClockProps) {
     this.dynamicBodies[i].update(clock);
   }
 }
+```
+
+## Additional Animation
+> 자동적으로 주어지는 물리적 animation외에 body에 별도의 animation을 적용하기 위해서는 아래와 같이 처리한다. <br>
+> useFrame 을 활용한 animation 처리하기
+```
+await this.world.addObject(obstacle2, (mesh:any, body:any) => {
+  if(body) {
+    body.useFrame = (clock: any) => {
+      const time = clock.elapsedTime;
+      const y = -0.3 * Math.sin(1.5 * difficulty * time + timeOffset) + 1.3;
+      body.rigidBody.setNextKinematicTranslation({
+        x: position[0],
+        y: position[1] + y- 0.8,
+        z: position[2],
+      });
+    };
+  };
+});
 ```

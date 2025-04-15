@@ -69,7 +69,7 @@ export class Mesh {
   public async create(args: Tmesh):Promise<THREE.Mesh> {
     const geometry = this.createGeometry(args.geometry)
     // const materialObj = new Material();
-    const material = await new Material().createMaterial(args.material);
+    const material = <THREE.Material>await new Material().createMaterial(args.material);
 
     this.mesh = this.createMesh(geometry, material, args.mesh || {});
     return <THREE.Mesh>this.mesh;
@@ -101,13 +101,6 @@ export class Mesh {
     callback(gltf);
 
     return this;
-    // this.mesh.name = args.name || null;
-    // args.scale? this.mesh.scale.set(args.scale.x, args.scale.y, args.scale.z): null;
-    // this.mesh.castShadow = args.castShadow || false;
-    // this.mesh.receiveShadow = args.receiveShadow || false;
-    // args.position ? this.mesh.position.set(args.position.x, args.position.y, args.position.z) : null;
-
-    // return this.mesh;
   }
 
   public async loadRGBE(args: any, callback:(gltf:LoaderGLTF)=>void) {
@@ -130,7 +123,7 @@ export class Mesh {
     return new Geometry().create(params)
   }
 
-  private createMesh(geometry: any, material: any, args: any):THREE.Mesh {
+  private createMesh(geometry: THREE.BufferGeometry, material: THREE.Material | THREE.Material[], args: any):THREE.Mesh {
     const mesh = new THREE.Mesh( geometry, material);
     Object.keys(args).forEach((key: any) =>{
       if(key in MeshOptions) {

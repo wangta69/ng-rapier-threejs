@@ -25,6 +25,11 @@ export interface ClockProps {
   elapsedTime:number
 }
 
+export interface Itest {
+  mesh: THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, 
+  body: Body
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -204,7 +209,6 @@ export class World {
 
     this.updates.forEach((fnc:(clock: ClockProps) => void)=>{
 
-      // console.log(this.updates)
       fnc(clock);
     })
 
@@ -243,7 +247,6 @@ export class World {
    * @returns 
    */
   public async addObject(props: Tmesh, callback?:(mesh?:THREE.Mesh, body?:Body)=>void) {
-    // console.log('name:',props.rapier.body.userData.name);
     const mesh:THREE.Mesh = await new Mesh().create({geometry: props.geometry, material: props.material, mesh: props.mesh});
 
     this.scene.add(mesh);
@@ -260,13 +263,11 @@ export class World {
         callback(mesh);
       }
     }
-
-    
     return this;
   }
 
   public async addObjectFromObjFile(props: Tobj, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
-   const mesh = await new Mesh().loadObj(props);
+    const mesh = await new Mesh().loadObj(props);
 
     this.scene.add(mesh);
     let body;
@@ -281,6 +282,82 @@ export class World {
     }
     return this;
   }
+
+  /**
+   * 
+   * @param props {url, [{name, props},..]}
+   */
+  /*
+  public async addObjectFromGLTF(props: any, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
+    await new Mesh().loadGLTF(props, async (gltf) => {
+      const mesh = <THREE.Mesh>gltf.getObjectByName('Cylinder');
+      if(mesh) {
+        mesh.traverse((m) => {
+          m.receiveShadow = true
+        });
+      }
+
+      this.scene.add(mesh);
+      let body;
+      if(props.rapier) {
+        props.rapier.object3d = mesh;
+        body = await this.rapier.createBody(props.rapier);
+      }
+
+      if(callback) {
+        callback(mesh, body);
+      }
+    });
+  }
+*/
+  // public async addObjectFromGLTF(props: any, callback?:(mesh:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
+  // public async addObjectFromGLTF(props: any, callback?:(obj:Itest[]) =>void) {
+  public async addObjectFromGLTF(props: any, callback?:(obj:{
+    mesh: THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, 
+    body?: Body
+  }[]) =>void) {
+
+
+    const obj:{mesh:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body}[] = [];
+    const MeshClass = new Mesh();
+    await MeshClass.loadGLTF(props, async (gltf) => {
+
+      for(let i=0; i < props.props.length; i++) {
+        const prop = props.props[i];
+
+        let mesh:any;
+        if(prop.name) {
+          mesh = <THREE.Mesh>gltf.getObjectByName(prop.name);
+        } else {
+          mesh = <THREE.Mesh>gltf.getObject();
+        }
+        if(mesh) {
+          mesh.traverse((m:any) => {
+            if(prop.receiveShadow) {
+              m.receiveShadow = true
+            }
+          });
+        }
+
+        this.scene.add(mesh);
+        let body:Body | undefined = undefined;
+        if(prop.rapier) {
+
+          prop.rapier.object3d = mesh;
+          body = await this.rapier.createBody(prop.rapier);
+
+        }
+
+        obj.push({mesh, body});
+
+      }
+      if(callback) {
+        callback(obj);
+      }
+      
+    });
+  }
+
 
   /**
    * crete only rapier body

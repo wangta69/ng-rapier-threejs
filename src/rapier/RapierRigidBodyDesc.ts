@@ -7,50 +7,19 @@ import {
 export type RigidBodyTypeString =
   | "fixed"
   | "dynamic"
+  | "kinematicPositionBased"
   | "kinematicPosition"
+  | "kinematicVelocityBased"
   | "kinematicVelocity";
 
   const rigidBodyTypeMap = {
     fixed: 1,
     dynamic: 0,
+    kinematicPositionBased: 2,
     kinematicPosition: 2,
+    kinematicVelocityBased: 3,
     kinematicVelocity: 3
   } as const;
-
-/*
-setAdditionalMassProperties(mass: number, centerOfMass: Vector, principalAngularInertia: Vector, angularInertiaLocalFrame: Rotation): RigidBodyDesc;
-enabledTranslations(translationsEnabledX: boolean, translationsEnabledY: boolean, translationsEnabledZ: boolean): RigidBodyDesc;
-restrictTranslations(translationsEnabledX: boolean, translationsEnabledY: boolean, translationsEnabledZ: boolean): RigidBodyDesc;
-lockTranslations(): RigidBodyDesc;
-enabledRotations(rotationsEnabledX: boolean, rotationsEnabledY: boolean, rotationsEnabledZ: boolean): RigidBodyDesc;
-restrictRotations(rotationsEnabledX: boolean, rotationsEnabledY: boolean, rotationsEnabledZ: boolean): RigidBodyDesc;
-lockRotations(): RigidBodyDesc;
-*/
-
-// export type keyTrigidBodyProps = {
-//   additionalMass: string,
-//   additionalSolverIterations: string,
-//   angularDamping: string,
-//   angvel: string,
-//   canSleep: string,
-//   ccdEnabled: string,
-//   dominanceGroup: string,
-//   enabled: string,
-//   gravityScale: string,
-//   linearDamping: string,
-//   linvel: string,
-//   rotation: string,
-//   sleeping: string,
-//   softCcdPrediction: string,
-//   translation: string,
-//   userData: string,
-// }
-
-// export type rigidBodyPropsKey =
-//   'additionalMass' | 'additionalSolverIterations'|'angularDamping'|'angvel'|'canSleep'|
-//   'ccdEnabled'|'dominanceGroup'|'enabled'| 'gravityScale'|'linearDamping'|'linvel'|'rotation'|'sleeping'|'softCcdPrediction'|
-//   'translation'|'userData';
-
 
 export type TrigidBodyProps = {
   additionalMass?: number,
@@ -114,8 +83,14 @@ const RigidBodyOptions: {[key: string]: (rigidbody:RigidBodyDesc, value: any) =>
   linvel: (rigidbody:RigidBodyDesc, value: THREE.Vector3) => {
     rigidbody.setLinvel(value.x,  value.y, value.z);
   },
-  rotation: (rigidbody:RigidBodyDesc, value: THREE.Quaternion ) => {
-    rigidbody.setRotation(value);
+  rotation: (rigidbody:RigidBodyDesc, value: THREE.Quaternion | number[] ) => {
+    if(Array.isArray(value)){
+      rigidbody.setRotation(new THREE.Quaternion().setFromEuler(new THREE.Euler(...value)));
+    } else {
+      rigidbody.setRotation(value);
+    }
+    
+ 
   },
   sleeping: (rigidbody:RigidBodyDesc, value: boolean) => {
     rigidbody.setSleeping(value);
@@ -142,7 +117,7 @@ export class RapierRigidBodyDesc {
   constructor() {}
 
   public createRigidBodyFromOptions(options: any): RigidBodyDesc | null {
-    const type = this.rigidBodyTypeFromString(options?.type || "fixed");
+    const type = this.rigidBodyTypeFromString(options?.type || 'fixed');
     const desc = new RigidBodyDesc(type);
     return this.setRigidBodyDescFromOption(<RigidBodyDesc>desc, options);
   };
@@ -152,7 +127,7 @@ export class RapierRigidBodyDesc {
   }
   
   private setRigidBodyDescFromOption(desc: RigidBodyDesc, options: any) {
-    Object.keys(options).forEach((key: any) =>{
+    Object.keys(options).forEach((key: string) =>{
       if(key in RigidBodyOptions) {
         RigidBodyOptions[key](desc, options[key]);
       }

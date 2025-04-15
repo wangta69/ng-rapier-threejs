@@ -85,8 +85,8 @@ export class Rapier {
    * @returns 
    */
   public async createBody(props: any) {
-    const bodyObj = await new Body(this)
-    bodyObj.create(props);
+    const bodyObj = new Body(this);
+    await bodyObj.create(props);
     return bodyObj;
   }
 }
