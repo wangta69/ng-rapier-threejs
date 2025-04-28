@@ -11,29 +11,15 @@ npm i ng-rapier-threejs
 ### SourceCode
 ```
 
-import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import * as THREE from 'three';
-
-import Stats from 'three/addons/libs/stats.module.js'
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
-import RAPIER from '@dimforge/rapier3d-compat'
-import {Rapier, World, Mesh, Body} from 'ng-rapier-threejs';
-@Component({
-selector: 'app-root',
-templateUrl: './scene.html',
-})
+import {World} from 'ng-rapier-threejs';
+..........
 export class RapierSample2Component implements AfterViewInit {
   @ViewChild('domContainer', {static: true}) domContainer!: ElementRef;
 
-  private raycaster = new THREE.Raycaster()
-  private mouse = new THREE.Vector2()
-  public world!:World
-  public rapier!:Rapier;
-  private stats!:Stats;
+  public world:World
 
-  constructor(world: World, rapier: Rapier) {
+  constructor(world: World) {
     this.world = world;
-    this.rapier = rapier;
   }
 
   ngAfterViewInit() {
@@ -68,25 +54,15 @@ export class RapierSample2Component implements AfterViewInit {
         castShadow: true,
         shadow: {blurSamples: 10, radius: 5}
       })
+      .enableRapier(async (rapier: Rapier) => {
+        this.rapier = rapier;
+        rapier.init([0.0, -9.81,  0.0]);
+        // await rapier.initRapier(0.0, -9.81, 0.0);
+        rapier.enableRapierDebugRenderer();
+      })
       .enableControls({damping: true, target:{x: 0, y: 1, z: 0}})
-      .enableHelpers({position: {x: 0, y: -75, z: 0}})
+      .setGridHelper({position: {x: 0, y: -75, z: 0}})
       .update(); // requestAnimationFrame(this.update)
-
-      await this.rapier.initRapier(0.0, -9.81, 0.0);
-      this.rapier.enableRapierDebugRenderer();
-
-      this.addRendererOption();
-
-      this.stats = new Stats()
-      document.body.appendChild(this.stats.dom)
-      
-      const gui = new GUI()
-      
-      const physicsFolder = gui.addFolder('Physics')
-      physicsFolder.add(this.rapier.world.gravity, 'x', -10.0, 10.0, 0.1)
-      physicsFolder.add(this.rapier.world.gravity, 'y', -10.0, 10.0, 0.1)
-      physicsFolder.add(this.rapier.world.gravity, 'z', -10.0, 10.0, 0.1)
-
   }
 ```
 
@@ -122,8 +98,7 @@ await this.world.addObject({
     collider: {shape: 'cuboid', args:[25, 0.5, 25]},
   }
 }, (mesh, body) => {
-    console.log('mesh:', mesh);
-    console.log('body:', body);
+
   });
 ```
 
