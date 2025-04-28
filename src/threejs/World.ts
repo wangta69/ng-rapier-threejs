@@ -62,8 +62,17 @@ export class World {
 
   public enableControls(controlProps?:any) {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    this.controls.enableDamping = controlProps?.damping || false; // an animation loop is required when either damping or auto-rotation are enabled
+    this.controls.dampingFactor = controlProps?.dampingFactor || 0.05;
+    this.controls.enableDamping = controlProps?.enableDamping || false; // an animation loop is required when either damping or auto-rotation are enabled
+    this.controls.enableDamping = controlProps?.damping || false; // disable
+    this.controls.enableZoom = controlProps?.enableZoom || false;
+    //     this.controls.screenSpacePanning = false;
+    this.controls.minDistance = controlProps?.minDistance || 0;
+    this.controls.maxDistance = controlProps?.maxDistance || Infinity;
+    this.controls.screenSpacePanning = controlProps?.screenSpacePanning || false;
+    this.controls.maxPolarAngle = controlProps?.maxPolarAngle || Math.PI; //
+    // this.controls.enableZoom = true;
+    this.controls.zoomSpeed = controlProps?.zoomSpeed || 1;
     this.controls.target.z = controlProps?.target.x || 0;
     this.controls.target.y = controlProps?.target.y || 0;
     this.controls.target.z = controlProps?.target.z || 0;
