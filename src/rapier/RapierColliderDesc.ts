@@ -51,6 +51,7 @@ export type ColliderShape =
 // }
 
   export type TcolliderProps = {
+    [key: string]: any;
     activeCollisionTypes?: number,
     activeEvents?: string,
     activeHooks?: number,
@@ -91,7 +92,7 @@ export type ColliderShape =
 
   }
 
-const ColliderOptions: any = {
+const ColliderOptions: {[key: string]: (arg1:ColliderDesc, arg2: any)=>void} = {
   activeCollisionTypes: (collider:ColliderDesc, value: number) => {
     collider.setActiveCollisionTypes(value);
   },
@@ -110,9 +111,9 @@ const ColliderOptions: any = {
   contactForceEventThreshold: (collider:ColliderDesc, value: number) => {
     collider.setContactForceEventThreshold(value);
   },
-  contactSkin: (collider:ColliderDesc, value: number) => {
-    collider.setContactSkin(value);
-  },
+  // contactSkin: (collider:ColliderDesc, value: number) => {
+  //   collider.setContactSkin(value);
+  // },
   density: (collider:ColliderDesc, value: number) => {
     collider.setDensity(value);
   },
@@ -178,7 +179,8 @@ export class RapierColliderDesc {
 
     switch(shape) {
       case 'heightfield': // Heightfield uses a vector
-        desc = ColliderDesc[shape](<number>scaledArgs[0], <number>scaledArgs[1], <Float32Array<ArrayBufferLike>>scaledArgs[2], <Vector>scaledArgs[3], <number>scaledArgs[4]);
+        // ColliderDesc.heightfield(nrows, NoColorSpace, heights, scale, )
+        desc = ColliderDesc[shape](<number>scaledArgs[0], <number>scaledArgs[1], <Float32Array<ArrayBufferLike>>scaledArgs[2], <Vector>scaledArgs[3]);
         break;
       case 'trimesh':
       case 'convexMesh':
@@ -211,8 +213,8 @@ export class RapierColliderDesc {
   };
 
 
-  private setColliderDescFromOption(desc: ColliderDesc, options: any) {
-    Object.keys(options).forEach((key: any) =>{
+  private setColliderDescFromOption(desc: ColliderDesc, options: TcolliderProps) {
+    Object.keys(options).forEach((key: string) =>{
       if(key in ColliderOptions) {
         ColliderOptions[key](desc, options[key]);
       }

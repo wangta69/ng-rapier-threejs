@@ -24,7 +24,7 @@ export class Body {
   // private eventQueue: RAPIER.EventQueue;
 
   private onCollisionEnter!: (handle1?:number, handle2?: number) => void;
-
+  // private collisionEvent!: CustomEvent;
   constructor(rapier: Rapier) {
     this.rapier = rapier;
   }
@@ -58,6 +58,8 @@ export class Body {
         
         this.onCollisionEnter = params.collider.onCollisionEnter;
         this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+
+        // this.dispatchEvent(new Event('change'));
       }
       this.rapier.dynamicBodies.push(this);
     } 

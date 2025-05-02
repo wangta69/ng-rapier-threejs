@@ -152,6 +152,14 @@ await this.world.addObject({
   }
 });
 ```
+#### TextureLoader
+> texture loader 의 경우 material에 textureUrl 을 입력함으로서 자동으로 구현된다.
+```
+await this.world.addObject({
+  material: { textureUrl: 'assets/images/ball.png'}, 
+});
+
+```
 
 #### OBJLoader
 ```
@@ -280,6 +288,14 @@ class Car {
   }
 }
 ```
+#### addRapierBody
+> mesh 없이 rapier body 만 생성할때 사용
+```
+await this.world.addRapierBody({
+  body: {type: 'fixed', additionalMass: 0, translation: [-1, 0.5, 1]},
+  collider: {shape: 'cuboid', args:[1 / 2, 1 / 2, 1 / 2]},
+});
+```
 
 ## mesh
 ### geometry
@@ -340,3 +356,25 @@ await this.world.addObject(obstacle2, (mesh:any, body:any) => {
   };
 });
 ```
+
+## drainCollisionEvents
+```
+await this.world.addObject({
+  rapier: {
+    collider: {
+      onCollisionEnter:()=>{}
+    },
+  }
+});
+```
+
+## Lensflare
+```
+import {LensFlare} from 'ng-rapier-threejs'; 
+const lensflare = (await new LensFlare()
+  .addElement({ texture: { url: 'assets/images/lensflare.png' }, size: 700, distance: 0, color: 0xe61a19 }))
+  .get();
+```
+
+
+

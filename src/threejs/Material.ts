@@ -1,42 +1,86 @@
-import * as THREE from "three";
+import {
+  MeshStandardMaterial, MeshStandardMaterialParameters, 
+  MeshNormalMaterial, MeshNormalMaterialParameters,
+  MeshPhongMaterial, MeshPhongMaterialParameters,
+  TextureLoader, ColorRepresentation,
+  RepeatWrapping,
+  Texture} from "three";
+import {textureLoader} from './lib/functions'
+interface TParams extends MeshStandardMaterialParameters, MeshNormalMaterialParameters, MeshPhongMaterialParameters  {
+}
 
-export class Material {
-  constructor() {
+export type Ttexture = {
+  url: string,
+  wrapS?: string,
+  wrapT?: string,
+  repeat?: [number, number]
+}
+export type Tmaterial = {
+  type: string,
+  texture?: Ttexture,
+  map?:Texture,
+  flatShading?: boolean,
+  color?: ColorRepresentation,
+  shininess?: number,
+}
 
-  }
+export const MaterialOptions: {[key: string]: (material:TParams, value: any) => void}  = {
+  color: (material:TParams, value:number) => {
+    material.color = value;
+  },
+  flatShading: (material:TParams, value:boolean) => {
+    material.flatShading = value;
+  },
+  shininess: (material:TParams, value:number) => {
+    material.color = value;
+  },
+  map: (material:TParams, value:Texture) => {
+    material.map = value;
+  },
+}
 
-  public async createMaterial(args: any) {
-    const map = await this.loadmap(args);
-    // const map = await new THREE.TextureLoader().load( args.url );//this.loadmap(args);
-    // const map = null;
-    const params: any = {};
+export class MaterialObj {
+  constructor() {}
+
+  public async createMaterial(args: Tmaterial) {
+
+    const params: TParams = {};
+
+    args.texture ? params.map = await this.loadmap(args.texture) : null;
     params.flatShading = args.flatShading || false;
-    params.color = args.color || null;
-    params.map = map || null;
+    args.color ? params.color = args.color : null;
 
     switch(args.type) {
       case 'standard':
-        return new THREE.MeshStandardMaterial(params);   
+        return new MeshStandardMaterial(params);   
       case 'normal':
-        return new THREE.MeshNormalMaterial(params); 
+        return new MeshNormalMaterial(params); 
       case 'phong':
-        return new THREE.MeshPhongMaterial(params); 
-    }
-    return null;
-      
-  }
-
-  private async loadmap(args: any) {
-    if(args.textureUrl) {
-      return this.TextureLoader(args.textureUrl);
-    } else if(args.objUrl) {
-
+        return new MeshPhongMaterial(params); 
     }
     return null;
   }
 
-  private async TextureLoader(url: string) {
-    return await new THREE.TextureLoader().load( url );
+  private async loadmap(args: Ttexture) {
+    if(args.url) {
+      const map = await textureLoader(args.url);
+
+      args.wrapS ? map.wrapS = this.textureWrap(args.wrapS) : null;
+      args.wrapT ? map.wrapT = this.textureWrap(args.wrapT) : null;
+      args.repeat ? map.repeat.set(...args.repeat): null;
+
+      return map;
+    }
+    return null;
+  }
+
+  private textureWrap(wrap: string) {
+    switch (wrap) {
+      case 'repeat': return RepeatWrapping;
+    }
+
+    return null as any;
+    //
   }
 
   // private async OBJLoader(url: string) {

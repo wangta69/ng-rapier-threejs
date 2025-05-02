@@ -1,7 +1,16 @@
 import {WebGLRenderer, WebGLRendererParameters, ACESFilmicToneMapping, WebGLShadowMap} from "three";
 export interface RendererProps {
+  [key: string]: boolean | undefined;
   antialias?: boolean, 
   alpha?: boolean
+}
+
+export interface IRendereProperty {
+  [key: string]: any;
+  pixelRatio?: number,
+  shadowMap?: ShadowMapProps,
+  size?: number[],
+  toneMapping?: string,
 }
 
 export interface ShadowMapProps {
@@ -27,7 +36,7 @@ export const WebGLRendererParametersOptions =  [
 ];
 
 */
-export const RendererOptions: any = {
+export const RendererOptions: {[key: string]: (renderer:WebGLRenderer, value: any) => void}  = {
   pixelRatio: (renderer:WebGLRenderer, value:number) => {
     renderer.setPixelRatio(value);
     
@@ -50,26 +59,13 @@ export const RendererOptions: any = {
   }
 }
 
-// class childOfWebGLRendererParameters {
-//   id = "";
-//   title = "";
-//   isDeleted = false;
-// }
-
-
 export class Renderer {
   public renderer!: WebGLRenderer;
   constructor() {}
 
   // public WebGLRenderer(rendererProps: WebGLRendererParameters) {
-  public WebGLRenderer(rendererProps: any) {
-    const parameters:any = {} 
-
-    // Object.keys(rendererProps).forEach((key: any) =>{
-    //   if(WebGLRendererParametersOptions.indexOf(key) !== -1) {
-    //     parameters[key] = rendererProps[key];
-    //   }
-    // });
+  public WebGLRenderer(rendererProps: RendererProps) {
+    const parameters:RendererProps = {} 
 
     Object.keys(rendererProps).forEach((key:string) => {
       parameters[key] = rendererProps[key];
@@ -79,8 +75,8 @@ export class Renderer {
     return this;
   };
 
-  public setProperty(rendererProps: any) {
-    Object.keys(rendererProps).forEach((key: any) =>{
+  public setProperty(rendererProps: IRendereProperty) {
+    Object.keys(rendererProps).forEach((key: string) =>{
       if(key in RendererOptions) {
         RendererOptions[key](this.renderer, rendererProps[key]);
       }

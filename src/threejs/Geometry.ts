@@ -1,6 +1,8 @@
 import * as THREE from "three";
 
-export type IGeometry = 
+export type TgeometyrProps = {type: string, args: number[]}
+export type Igeometry = 
+  THREE.PlaneGeometry | 
   THREE.BoxGeometry | 
   THREE.SphereGeometry | 
   THREE.CylinderGeometry | 
@@ -12,7 +14,7 @@ export class Geometry {
 
   }
 
-  public create(params: any): IGeometry {
+  public create(params: TgeometyrProps): Igeometry {
     // let geometry: THREE.BoxGeometry | THREE.SphereGeometry | THREE.CylinderGeometry | THREE.IcosahedronGeometry;
     switch(params.type) {
       case 'sphere':
@@ -23,6 +25,8 @@ export class Geometry {
         return new THREE.IcosahedronGeometry(...params.args);
       case 'torusknot':
         return new THREE.TorusKnotGeometry(...params.args);
+      case 'plane':
+        return new THREE.PlaneGeometry(...params.args);
       default: // box
         return new THREE.BoxGeometry(...params.args);
     }

@@ -22,6 +22,7 @@ export type RigidBodyTypeString =
   } as const;
 
 export type TrigidBodyProps = {
+  [key: string]: any;
   additionalMass?: number,
   additionalSolverIterations?: number,
   angularDamping?: number,
@@ -95,9 +96,9 @@ const RigidBodyOptions: {[key: string]: (rigidbody:RigidBodyDesc, value: any) =>
   sleeping: (rigidbody:RigidBodyDesc, value: boolean) => {
     rigidbody.setSleeping(value);
   },
-  softCcdPrediction: (rigidbody:RigidBodyDesc, value: number) => {
-    rigidbody.setSoftCcdPrediction(value);
-  },
+  // softCcdPrediction: (rigidbody:RigidBodyDesc, value: number) => {
+  //   rigidbody.setSoftCcdPrediction(value);
+  // },
   translation: (rigidbody:RigidBodyDesc, value: THREE.Vector3 | number[]) => {
     if(Array.isArray(value)){
       rigidbody.setTranslation(value[0],  value[1], value[2]);

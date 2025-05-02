@@ -1,19 +1,23 @@
-import * as THREE from "three";
-// import {GLTFLoader, GLTF} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {ColorRepresentation, Color} from "three";
+import {textureLoader} from '../lib/functions'
 import { Lensflare, LensflareElement } from 'three/addons/objects/Lensflare.js'
 type TLensflareElement = {
-  texture: THREE.Texture, 
+ // texture: THREE.Texture, 
+  texture: {url: string},
   size?: number, 
   distance?: number, 
-  color?: THREE.Color
+  color?: number, // ColorRepresentation
 }
 export class LensFlare {
   public lensflare: Lensflare;
   constructor() {
     this.lensflare = new Lensflare();
   }
-  public addElement(params:TLensflareElement) {
-    this.lensflare.addElement(new LensflareElement(params.texture, params.size, params.distance, params.color));
+  public async addElement(params:TLensflareElement) {
+
+    const texture = await textureLoader(params.texture.url);
+    const color = params.color ? new Color().setHex( params.color) : undefined;
+    this.lensflare.addElement(new LensflareElement(texture, params.size, params.distance, color));
 
     return this;
   }

@@ -21,9 +21,9 @@ export {World} from './threejs/World';
 export type {ClockProps} from './threejs/World';
 export {Body} from './rapier/Body';
 
-export {Mesh} from './threejs/Mesh';
+export {MeshObj} from './threejs/Mesh';
 // export {World as RapierWorld} from './threejs/World';
-export {Light} from './threejs/lib/Light';
+export {LightObj} from './threejs/lib/Light';
 export {EventListener} from './threejs/lib/EventListener';
 
 export {LensFlare} from './threejs/addons/LensFlare';

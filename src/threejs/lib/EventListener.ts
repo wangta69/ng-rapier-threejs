@@ -1,28 +1,32 @@
 import { Injectable } from '@angular/core';
-import {WebGLRenderer, WebGLRendererParameters, ACESFilmicToneMapping, WebGLShadowMap} from "three";
+import {WebGLRenderer} from "three";
 
-
-type bindMouse = {
+type BindEvent = {
   keydown: any,
   keyup: any,
   mousemove: any,
-  wheel: any
+  wheel: any,
+  click: any
 }
+
 @Injectable({
   providedIn: 'root',
 })
 export class EventListener {
 
   public keyMap: { [key: string]: boolean } = {}
-  private bindMouse: bindMouse = {
+  public key: string = '';
+  private bindEvent: BindEvent = {
     keydown: {},
     keyup: {},
     mousemove: {},
-    wheel: {}
+    wheel: {},
+    click: {}
   }
 
   public onMouseMove: any[] = []; // {document: fn}
   public onMouseWheel: any[] = [];
+  public onMouseClick: any[] = [];
   public windowResize: any[] = [];
 
   public activeMouseMove(renderer: WebGLRenderer) {
@@ -35,7 +39,7 @@ export class EventListener {
     window.addEventListener('resize', () => {
       this.windowResize.forEach(fn =>{
         fn.bind(this)();
-      } )
+      });
     })
   }
 
@@ -44,42 +48,69 @@ export class EventListener {
   //     renderer.domElement.requestPointerLock()
   //   })
   // }
+  // Keyboard event
+  public enableKeybordEvent() {
+    this.bindEvent.keydown = this.onDocumentKey.bind(this);
+    this.bindEvent.keyup = this.onDocumentKey.bind(this);
+    document.addEventListener('keydown', this.bindEvent.keydown );
+    document.addEventListener('keyup', this.bindEvent.keyup);
+  }
+
+  public disableKeyboardEvent() {
+    document.removeEventListener('keydown', this.bindEvent.keydown);
+    document.removeEventListener('keyup', this.bindEvent.keyup);
+  }
+
+  // MouseEvent
+  public enableMouseClickEvent(renderer: WebGLRenderer) {
+    this.bindEvent.click = this.onRendererMouseClick.bind(this);
+
+    renderer.domElement.addEventListener('click', this.bindEvent.click);
+  }
+
+  public enableMouseEvent(renderer: WebGLRenderer) {
+    this.bindEvent.mousemove = this.onDocumentMouseMove.bind(this);
+    this.bindEvent.wheel = this.onDocumentMouseWheel.bind(this);
+    renderer.domElement.addEventListener('mousemove', this.bindEvent.mousemove);
+    renderer.domElement.addEventListener('wheel',  this.bindEvent.wheel);
+  }
+
+  public disableMouseEvent(renderer: WebGLRenderer) {
+    renderer.domElement.removeEventListener('mousemove', this.bindEvent.mousemove);
+    renderer.domElement.removeEventListener('wheel',  this.bindEvent.wheel);
+  }
 
   public activeClickEvent(renderer: WebGLRenderer) {
     document.addEventListener('click', () => {
       renderer.domElement.requestPointerLock()
     })
   }
- 
+
   public activePointerlockchange(renderer: WebGLRenderer) {
-    this.bindMouse.keydown = this.onDocumentKey.bind(this);
-    this.bindMouse.keyup = this.onDocumentKey.bind(this);
-    this.bindMouse.mousemove = this.onDocumentMouseMove.bind(this);
-    this.bindMouse.wheel = this.onDocumentMouseWheel.bind(this);
     
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement === renderer.domElement) {
-        document.addEventListener('keydown', this.bindMouse.keydown )
-        document.addEventListener('keyup', this.bindMouse.keyup)
-    
-        renderer.domElement.addEventListener('mousemove', this.bindMouse.mousemove)
-        renderer.domElement.addEventListener('wheel',  this.bindMouse.wheel)
+        this.enableKeybordEvent()
+        this.enableMouseEvent(renderer);
       } else {
-        document.removeEventListener('keydown', this.bindMouse.keydown)
-        document.removeEventListener('keyup', this.bindMouse.keyup)
-    
-        renderer.domElement.removeEventListener('mousemove', this.bindMouse.mousemove)
-        renderer.domElement.removeEventListener('wheel',  this.bindMouse.wheel)
+        this.disableKeyboardEvent();
+        this.disableMouseEvent(renderer);
       }
     })
   }
 
   private onDocumentKey(e: KeyboardEvent) {
     this.keyMap[e.code] = e.type === 'keydown';
+    this.key = e.type === 'keydown' ? e.code: '';
+  }
+
+  private onRendererMouseClick(e: MouseEvent) {
+    this.onMouseClick.forEach(fn =>{
+      fn.bind(this)(e);
+    } )
   }
 
   private onDocumentMouseMove(e: MouseEvent) {
-
     this.onMouseMove.forEach(fn =>{
       fn.renderer.bind(this)(e);
     } )
@@ -96,6 +127,10 @@ export class EventListener {
    * @param fn {document | renderer: fn}
    */
   public addMouseMoveEvent(fn: any) {
+    this.onMouseMove.push(fn);
+  }
+
+  public addMouseClickEvent(fn: any) {
     this.onMouseMove.push(fn);
   }
 

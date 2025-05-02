@@ -140,7 +140,7 @@ export class ColliderProps {
   
     // initialize the arrays
     for (let i = 0, l = attributeNames.length; i < l; i++) {
-      const name = attributeNames[i]
+      const name = <"position" | "normal" | "color">attributeNames[i]
   
       attrArrays[name] = []
   
@@ -159,7 +159,7 @@ export class ColliderProps {
       // Generate a hash for the vertex attributes at the current index 'i'
       let hash = ''
       for (let j = 0, l = attributeNames.length; j < l; j++) {
-        const name = attributeNames[j]
+        const name = <"position" | "normal" | "color">attributeNames[j]
         const attribute = geometry.getAttribute(name)
         const itemSize = attribute.itemSize
   
@@ -177,7 +177,7 @@ export class ColliderProps {
       } else {
         // copy data to the new index in the attribute arrays
         for (let j = 0, l = attributeNames.length; j < l; j++) {
-          const name = attributeNames[j]
+          const name = <"position" | "normal" | "color">attributeNames[j]
           const attribute = geometry.getAttribute(name)
           const morphAttr = geometry.morphAttributes[name]
           const itemSize = attribute.itemSize
@@ -219,11 +219,11 @@ export class ColliderProps {
       // Update the attribute arrays
       if (name in morphAttrsArrays) {
         for (let j = 0; j < morphAttrsArrays[name].length; j++) {
-          const oldMorphAttribute = geometry.morphAttributes[name][j]
+          const oldMorphAttribute = geometry.morphAttributes[name as "position" | "normal" | "color"][j]
           //@ts-expect-error something to do with functions and constructors and new
           const buffer = new (oldMorphAttribute.array as TypedArray).constructor(morphAttrsArrays[name][j])
           const morphAttribute = new THREE.BufferAttribute(buffer, oldMorphAttribute.itemSize, oldMorphAttribute.normalized)
-          result.morphAttributes[name][j] = morphAttribute
+          result.morphAttributes[name as "position" | "normal" | "color"][j] = morphAttribute
         }
       }
     }

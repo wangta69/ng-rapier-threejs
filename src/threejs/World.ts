@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
-import RAPIER from '@dimforge/rapier3d-compat';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import {Light} from './lib/Light';
-import {Mesh, Tmesh, Tobj} from './Mesh';
-import {Renderer, RendererProps} from './lib/Renderer';
+import {MeshObj, Tmesh} from './Mesh';
+
+import {Renderer, RendererProps, IRendereProperty} from './lib/Renderer';
+
+import {LightObj, LightProps} from './lib/Light';
+import {Camera, CameraProps} from './lib/Camera';
+import { OrbitControl, TcontrolProps } from './addons/OrbitControls';
+import {GridHelperObj, TGrid} from './helpers/GridHelper';
+import {AxesHelperObj} from './helpers/AxesHelper';
+
 import {Rapier} from '../rapier/Rapier';
 import {Tcollider, Body} from '../rapier/Body';
-interface CameraProps {
-  fov?: number, 
-  aspect?: number, 
-  near?: number, 
-  far?:number,
-  position?: number[]
-}
 
 interface ScreenProps {
   width?: number,
@@ -30,20 +28,26 @@ export interface Itest {
   body: Body
 }
 
-
+type lightsProps = {
+  [key: string]: any; // string| undefined | Light; // key는 문자열, 값은 어떤 타입이든 가능
+  key?: string,
+  val?: LightObj
+}
 @Injectable({
   providedIn: 'root',
 })
 export class World {
 
-  private container: any;
+  private container!: HTMLElement;
   public scene = new THREE.Scene();
   private clock = new THREE.Clock();
 
   public updates:any[] = [];
 
-  private controls!:OrbitControls;
-  private helpers!:THREE.GridHelper;
+  public lights: lightsProps = {};
+
+  private orbitControls!:OrbitControl;
+  private gridHelper!:THREE.GridHelper;
 
   public renderer!:THREE.WebGLRenderer; // = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
  
@@ -60,22 +64,9 @@ export class World {
     return this;
   }
 
-  public enableControls(controlProps?:any) {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.dampingFactor = controlProps?.dampingFactor || 0.05;
-    this.controls.enableDamping = controlProps?.enableDamping || false; // an animation loop is required when either damping or auto-rotation are enabled
-    this.controls.enableDamping = controlProps?.damping || false; // disable
-    this.controls.enableZoom = controlProps?.enableZoom || false;
-    //     this.controls.screenSpacePanning = false;
-    this.controls.minDistance = controlProps?.minDistance || 0;
-    this.controls.maxDistance = controlProps?.maxDistance || Infinity;
-    this.controls.screenSpacePanning = controlProps?.screenSpacePanning || false;
-    this.controls.maxPolarAngle = controlProps?.maxPolarAngle || Math.PI; //
-    // this.controls.enableZoom = true;
-    this.controls.zoomSpeed = controlProps?.zoomSpeed || 1;
-    this.controls.target.z = controlProps?.target.x || 0;
-    this.controls.target.y = controlProps?.target.y || 0;
-    this.controls.target.z = controlProps?.target.z || 0;
+  public enableControls(controlProps?:TcontrolProps) {
+    this.orbitControls = new OrbitControl(this.camera, this.renderer.domElement)
+    .setProps(controlProps);
     return this;
   }
 
@@ -84,17 +75,24 @@ export class World {
    * @param helperProps 
    * @deprecated
    */
-  public enableHelpers(helperProps?: any) {
-    this.setGridHelper(helperProps)
+  public enableHelpers(helperProps?: TGrid) {
+    this.setGridHelper(helperProps);
+    return this;
   }
-  public setGridHelper(helperProps?: any) {
-    helperProps.args = helperProps.args || [1000, 40, 0x303030, 0x303030];
-    this.helpers = new THREE.GridHelper( ...helperProps.args);
-    // this.helpers = new THREE.GridHelper( 1000, 40, 0x303030, 0x303030 );
-    this.helpers.position.x = helperProps.position?.x || 0;
-    this.helpers.position.y = helperProps.position?.y || 0;
-    this.helpers.position.z = helperProps.position?.z || 0;
-    this.scene.add( this.helpers );
+
+
+  public setGridHelper(helperProps?: TGrid) {
+    this.gridHelper = new GridHelperObj().create(helperProps);
+    this.scene.add( this.gridHelper );
+    return this;
+  }
+
+  /**
+   * X축은 빨간색입니다. Y축은 녹색입니다. Z축은 파란색입니다.
+   */
+  public setAxesHelper() {
+    const axesHelper = new AxesHelperObj().create();
+    this.scene.add( axesHelper );
     return this;
   }
 
@@ -119,7 +117,7 @@ export class World {
    * @returns 
    */
   // public setRenderer(rendererProps: RendererProps, property?: any) {
-  public setRenderer(rendererProps: any, property?: any) {
+  public setRenderer(rendererProps: RendererProps, property?: IRendereProperty) {
     // this.renderer = new THREE.WebGLRenderer( rendererProps ).setProperty();
     property = property || {};
   
@@ -131,25 +129,12 @@ export class World {
     );
 
     this.renderer = renderer.renderer;
-    // this.renderer.setPixelRatio( window.devicePixelRatio );
-    // this.renderer.setSize( this.screen.width, this.screen.height );
     this.container.appendChild( this.renderer.domElement );
     return this;
   }
 
   public setCamera(cameraProps:CameraProps) {
-    let {fov, aspect, near, far} = cameraProps;
-
-    fov = fov || 25; // 현재값 : 25
-    aspect = aspect || window.innerWidth / window.innerHeight;
-    near = near || 0.1; 
-    far = far || 200; // 200
-
-    this.camera = new THREE.PerspectiveCamera( fov, aspect, near, far )
-    cameraProps.position ? this.camera.position.set( cameraProps.position[0], cameraProps.position[1], cameraProps.position[2] ) : this.camera.position.set( 0, 0, 0 );
-
-    // this.camera.position.set( 0, 0, 100 ); // 0, 0, 200
-
+    this.camera = new Camera().create(cameraProps).get();
     return this;
   }
 
@@ -177,29 +162,20 @@ export class World {
   //   return this;
   // }
 
-  public setLight(lightProp: any, callback?:(light: Light)=>void) {  
-    const light = new Light(lightProp);
-    this.scene.add(light.light);
-    
-    if(lightProp.helper) {
-      this.scene.add( light.helper );
+  public setLight(lightProp: LightProps, callback?:(light: LightObj)=>void) {  
+    const lightObj = new LightObj(this).create(lightProp);
+    if(lightProp.name) { //  외부에서 다시 호출가능하게 정의  this.world.lights[name]
+      this.lights[lightProp.name] = lightObj;
     }
+    
     if(callback) {
-      callback(light);
+      callback(lightObj);
     }
     return this;
   }
 
-  public setLights(lightProps: any[]) {  
-    const holder =  new THREE.Object3D;
-    lightProps.forEach((lightProp: any) => {
-      const light = new Light(lightProp);
-      holder.add( light.light );
-      if(lightProp.helper) {
-        this.scene.add( light.helper );
-      }
-    });
-    this.scene.add( holder);
+  public setLights(lightProps: LightProps[]) {  
+    const light = new LightObj(this).addToHolder(lightProps);
     return this;
   }
 
@@ -212,12 +188,11 @@ export class World {
    
     const clock = {delta: this.clock.getDelta(), elapsedTime:this.clock.getElapsedTime()}
 
-    if(this.controls) {
-      this.controls.update();
+    if(this.orbitControls) {
+      this.orbitControls.update();
     }
 
     this.updates.forEach((fnc:(clock: ClockProps) => void)=>{
-
       fnc(clock);
     })
 
@@ -227,6 +202,7 @@ export class World {
   public update = () => {
     this.render();
     requestAnimationFrame(this.update); // request next update
+    return this;
   }
 
   public enableRapier(callback:(rapier: Rapier)=>void) {
@@ -244,9 +220,9 @@ export class World {
  * @deprecated  use addObject
  */
   public async addMesh(props: Tmesh) {
-    const mesh:THREE.Mesh = await new Mesh().create(props);
-    this.scene.add(mesh);
-    return mesh;
+    const meshObj = await new MeshObj(this).create(props);
+    this.scene.add(meshObj.mesh);
+    return meshObj;
   }
 
   /**
@@ -255,106 +231,73 @@ export class World {
    * @param callback 
    * @returns 
    */
-  public async addObject(props: Tmesh, callback?:(mesh?:THREE.Mesh, body?:Body)=>void) {
-    const mesh:THREE.Mesh = await new Mesh().create({geometry: props.geometry, material: props.material, mesh: props.mesh});
+  public async addObject(props: Tmesh, callback?:(meshObj?:MeshObj, body?:Body)=>void) {
+    const meshObj = await new MeshObj(this).create({geometry: props.geometry, material: props.material, mesh: props.mesh});
 
-    this.scene.add(mesh);
+    this.scene.add(meshObj.mesh);
     let body:Body;
     if(props.rapier) {
-      props.rapier.object3d = mesh;
+      props.rapier.object3d = meshObj.mesh;
       body = await this.rapier.createBody(props.rapier);
 
       if(callback) {
-        callback(mesh, body);
+        callback(meshObj, body);
       }
     } else {
       if(callback) {
-        callback(mesh);
+        callback(meshObj);
       }
     }
     return this;
   }
 
-  public async addObjectFromObjFile(props: Tobj, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
-    const mesh = await new Mesh().loadObj(props);
+  public async addObjectFromObjFile(props: Tmesh, callback?:(meshObj?:MeshObj | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
+    const meshObj = await new MeshObj(this).loadObj(props);
 
-    this.scene.add(mesh);
+    this.scene.add(meshObj.mesh);
     let body;
     if(props.rapier) {
-      props.rapier.object3d = mesh;
+      props.rapier.object3d = meshObj.mesh;
       body = await this.rapier.createBody(props.rapier);
     }
 
-    this.scene.add(mesh);
+    this.scene.add(meshObj.mesh);
     if(callback) {
-      callback(mesh, body);
+      callback(meshObj, body);
     }
     return this;
   }
 
-  /**
-   * 
-   * @param props {url, [{name, props},..]}
-   */
-  /*
-  public async addObjectFromGLTF(props: any, callback?:(mesh?:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
-    await new Mesh().loadGLTF(props, async (gltf) => {
-      const mesh = <THREE.Mesh>gltf.getObjectByName('Cylinder');
-      if(mesh) {
-        mesh.traverse((m) => {
-          m.receiveShadow = true
-        });
-      }
-
-      this.scene.add(mesh);
-      let body;
-      if(props.rapier) {
-        props.rapier.object3d = mesh;
-        body = await this.rapier.createBody(props.rapier);
-      }
-
-      if(callback) {
-        callback(mesh, body);
-      }
-    });
-  }
-*/
-  // public async addObjectFromGLTF(props: any, callback?:(mesh:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body)=>void) {
-  // public async addObjectFromGLTF(props: any, callback?:(obj:Itest[]) =>void) {
   public async addObjectFromGLTF(props: any, callback?:(obj:{
     mesh: THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, 
     body?: Body
   }[]) =>void) {
-
-
     const obj:{mesh:THREE.Mesh | THREE.Object3D<THREE.Object3DEventMap>, body?:Body}[] = [];
-    const MeshClass = new Mesh();
+    const MeshClass = new MeshObj(this);
     await MeshClass.loadGLTF(props, async (gltf) => {
 
       for(let i=0; i < props.props.length; i++) {
         const prop = props.props[i];
 
-        let mesh:any;
+        let mesh:THREE.Mesh;
         if(prop.name) {
           mesh = <THREE.Mesh>gltf.getObjectByName(prop.name);
         } else {
           mesh = <THREE.Mesh>gltf.getObject();
         }
-        if(mesh) {
-          mesh.traverse((m:any) => {
-            if(prop.receiveShadow) {
-              m.receiveShadow = true
-            }
-          });
-        }
+
+        mesh.traverse((m:any) => {
+          if(prop.receiveShadow) {
+            m.receiveShadow = true
+          }
+        });
+
 
         this.scene.add(mesh);
         let body:Body | undefined = undefined;
         if(prop.rapier) {
-
           prop.rapier.object3d = mesh;
           body = await this.rapier.createBody(prop.rapier);
-
         }
 
         obj.push({mesh, body});
