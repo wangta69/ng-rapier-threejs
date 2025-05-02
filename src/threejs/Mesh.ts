@@ -1,64 +1,74 @@
-import * as THREE from "three";
-import {Geometry, IGeometry} from './Geometry';
-import {Material} from './Material';
+import {Vector3, Mesh, Object3D, Material, BufferGeometry} from "three";
+import {Geometry, Igeometry, TgeometyrProps} from './Geometry';
+import {MaterialObj} from './Material';
 import {LoaderGLTF} from './addons/LoaderGLTF';
 import {LoaderObj} from './addons/LoaderObj';
 import {LoaderRGBE} from './addons/LoaderRGBE';
-
+import {Tcollider, Body} from '../rapier/Body';
+import {Tmaterial} from './Material';
+import {World} from './World';
+export type MeshProp = {
+  position?:number[] | Vector3,
+  scale?:number[] | Vector3,
+  rotation?: number[] | Vector3,
+  castShadow?: boolean,
+  receiveShadow?: boolean,
+  url?: string,
+  name?: string
+}
 export type Tmesh = {
-  geometry: any, // {type: 'box'}, // geometry 속성
-  material: any, // {type: 'standard'}, // material 속성
-  mesh: any, // { castShadow: true}
-  rapier?: any
+  geometry: TgeometyrProps, // {type: 'box'}, // geometry 속성
+  material: Tmaterial, // {type: 'standard'}, // material 속성
+  mesh: MeshProp, // { castShadow: true}
+  rapier?: Tcollider
 }
 
 // export type ObjProps = {
 //   url: string,
 //   name: string,
 // }
-export type Tobj = {
-  // geometry: any, // {type: 'box'}, // geometry 속성
-  material: any, // {type: 'standard'}, // material 속성
-  mesh: any, // { castShadow: true}
-  rapier?: any
-}
+// export type Tobj = {
+//   // geometry: any, // {type: 'box'}, // geometry 속성
+//   material: any, // {type: 'standard'}, // material 속성
+//   mesh: any, // { castShadow: true}
+//   rapier?: any
+// }
 
 const MeshOptions: any = {
-  position: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+  position: (mesh:Mesh, value: number[] | Vector3) => {
     if(Array.isArray(value)){
-      mesh.position.set(value[0],  value[1], value[2]);
+      mesh.position.set(...(value as [number, number, number]));
     } else {
       mesh.position.set(value.x, value.y, value.z);
     }
   },
-  scale: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+  scale: (mesh:Mesh, value: number[] | Vector3) => {
     if(Array.isArray(value)){
-      mesh.scale.set(value[0],  value[1], value[2]);
+      mesh.scale.set(...(value as [number, number, number]));
     } else {
       mesh.scale.set(value.x, value.y, value.z);
     }
   },
-  rotation: (mesh:THREE.Mesh, value: number[] | THREE.Vector3) => {
+  rotation: (mesh:Mesh, value: number[] | Vector3) => {
     if(Array.isArray(value)){
-      mesh.rotation.set(value[0],  value[1], value[2]);
+      mesh.rotation.set(...(value as [number, number, number]));
     } else {
       mesh.rotation.set(value.x, value.y, value.z);
     }
   },
-  castShadow: (mesh:THREE.Mesh, value: boolean) => {
+  castShadow: (mesh:Mesh, value: boolean) => {
     mesh.castShadow = value;
   },
-  receiveShadow: (mesh:THREE.Mesh, value: boolean) => {
+  receiveShadow: (mesh:Mesh, value: boolean) => {
     mesh.receiveShadow = value;
   }
 };
 
 
-export class Mesh {
-  public mesh!: THREE.Object3D | THREE.Mesh;
-  // public geometry!: IGeometry;
-  // public material!: THREE.Material;
-  constructor() {}
+export class MeshObj {
+  public mesh!: Object3D | Mesh;
+  private world: World;
+  constructor(world: World) {this.world = world}
 
   /**
    * 
@@ -66,32 +76,49 @@ export class Mesh {
    * @param geometry {type: sphereGeometry}
    * @param material 
    */
-  public async create(args: Tmesh):Promise<THREE.Mesh> {
+  public async create(args: Tmesh):Promise<MeshObj> {
     const geometry = this.createGeometry(args.geometry)
     // const materialObj = new Material();
-    const material = <THREE.Material>await new Material().createMaterial(args.material);
+    const material = <Material>await new MaterialObj().createMaterial(args.material);
 
     this.mesh = this.createMesh(geometry, material, args.mesh || {});
-    return <THREE.Mesh>this.mesh;
+    return this;
+    // return <Mesh>this.mesh;
   }
 
-  public async loadObj(args: Tobj) {
-    const loader = new LoaderObj();
-    const obj = await loader.create(args.mesh.url);
+  private createGeometry(params: any) {
+    params.args = params.args || [];
+    return new Geometry().create(params)
+  }
 
-    this.mesh = obj.getObjectByName(args.mesh.name) || obj;
-    const material = new Material();
+  private createMesh(geometry: BufferGeometry, material: Material | Material[], args: any):Mesh {
+    const mesh = new Mesh( geometry, material);
+    Object.keys(args).forEach((key: any) =>{
+      if(key in MeshOptions) {
+        MeshOptions[key](mesh, args[key]);
+      }
+    });
+
+    return mesh
+  }
+
+  public async loadObj(args: Tmesh) {
+    const loader = new LoaderObj();
+    const obj = await loader.create(args.mesh.url as string);
+
+    this.mesh = obj.getObjectByName(args.mesh.name as string) || obj;
+    const material = new MaterialObj();
     // this.material = await material.createMaterial(args.material);
     (this.mesh as any).material = await material.createMaterial(args.material);
 
-    this.mesh.name = args.mesh.name || null;
-    args.mesh.scale? this.mesh.scale.set(args.mesh.scale.x, args.mesh.scale.y, args.mesh.scale.z): null;
+    this.mesh.name = args.mesh.name || '';
+    args.mesh.scale? this.mesh.scale.set(...(args.mesh.scale as [number, number, number])): null;
     this.mesh.castShadow = args.mesh.castShadow || false;
     this.mesh.receiveShadow = args.mesh.receiveShadow || false;
 
-    args.mesh.position ? this.mesh.position.set(args.mesh.position.x, args.mesh.position.y, args.mesh.position.z) : null;
+    args.mesh.position ? this.mesh.position.set(...(args.mesh.position as [number, number, number])) : null;
 
-    return this.mesh;
+    return this;
   }
 
   public async loadGLTF(args: any, callback:(gltf:LoaderGLTF)=>void) {
@@ -118,19 +145,11 @@ export class Mesh {
     // return this.mesh;
   }
 
-  private createGeometry(params: any) {
-    params.args = params.args || [];
-    return new Geometry().create(params)
+
+  public dispose() {
+    (this.mesh as Mesh).geometry.dispose();
+    this.world.scene.remove(this.mesh);
   }
 
-  private createMesh(geometry: THREE.BufferGeometry, material: THREE.Material | THREE.Material[], args: any):THREE.Mesh {
-    const mesh = new THREE.Mesh( geometry, material);
-    Object.keys(args).forEach((key: any) =>{
-      if(key in MeshOptions) {
-        MeshOptions[key](mesh, args[key]);
-      }
-    });
-
-    return mesh
-  }
+  
 }
