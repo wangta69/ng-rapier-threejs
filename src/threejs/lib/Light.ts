@@ -9,6 +9,8 @@ import {
   Color,
   Object3D
 } from "three";
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
 import {World} from '../World';
 import {TLight, LightHelper, TLightHelper} from '../helpers/LightHelper';
 export type LightProps = {
@@ -18,11 +20,14 @@ export type LightProps = {
   angle?:number,
   castShadow?: boolean,
   color?: number,
+  decay?: number,
   distance?: number,
+  focus?: number, 
   intensity?: number,
   penumbra?: number,
   position?:[number, number, number],
-  helper?:TLightHelper,
+  // helper?:TLightHelper,
+  helper?:boolean,
   shadow?: any,
   addtoScene?: boolean,
 }
@@ -47,10 +52,16 @@ export const LightOptions: any = {
     light.color = new Color().setHex(value);
     // light.color = value;
   },
+  decay: (light:SpotLight, value: number) => {
+    light.decay = value;
+  },
   // Maximum range of the light. Default is 0 (no limit). Expects a Float.
   distance: (light:SpotLight, value: number) => {
     light.distance = value;
   },
+  // focus: (light:Light | AmbientLight | HemisphereLight, value: number) => {
+  //   light.focus = value;
+  // },
   // Numeric value of the light's strength/intensity. Expects a Float. Default 1.
   intensity: (light:Light, value: number) => {
     light.intensity = value;
@@ -78,7 +89,10 @@ export const LightShadowOptions: any = {
 export class LightObj {
   // private lightProps: LightProps;
   public light!: TLight ;
-  public helper!: TLightHelper ;
+  // public light: any;
+  // public light!: AmbientLight | HemisphereLight | DirectionalLight | PointLight | SpotLight;
+  // public helper!: TLightHelper ;
+  private helper = false ;
   private world: World;
   public name?:string;
 
@@ -117,7 +131,6 @@ export class LightObj {
 
     this.name = lightProps.name;
     this.setProperty(lightProps);
-
     this.world.scene.add(this.light);
 
     if(lightProps.helper) {
@@ -165,6 +178,19 @@ export class LightObj {
     this.light;
   }
 
+  public gui(opt: any) {
+    // const gui = new GUI();
+    const light: any = this.light;
+    const physicsFolder = this.world.gui.addFolder(opt.folder);
+    // physicsFolder.add(this.light, 'enableDamping');
+    physicsFolder.add(light, 'intensity', -10, 10, 0.01);
+    physicsFolder.add(light, 'distance', 0, 10, 0.01);
+    physicsFolder.add(light, 'angle', 0, 100, 1);
+    physicsFolder.add(light, 'penumbra', 0, 10, 0.1);
+    physicsFolder.add(light, 'decay', 0, 10, 0.1);
+    physicsFolder.add(light, 'focus', 0, 10, 0.1);
+  }
+
   public remove() {
     this.world.scene.remove(this.light);
   }
@@ -173,7 +199,7 @@ export class LightObj {
    * helper 는 별도로 분리 예정
    */
   private createHelpers(lightProps: LightProps) {
-    this.helper = new LightHelper().create(this.light, {type: lightProps.type, size: 0.1});
-    this.world.scene.add(this.helper);
+    const helper = new LightHelper().create(this.light, {type: lightProps.type, size: 0.1});
+    this.world.scene.add(helper);
   }
 }

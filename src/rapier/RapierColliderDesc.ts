@@ -74,7 +74,7 @@ export type ColliderShape =
     // 
     args?: number[]
     shape?: string,
-    onCollisionEnter?: any,
+    onCollisionEnter?: (handle1?:number, handle2?: number) => void,
   }
 
 

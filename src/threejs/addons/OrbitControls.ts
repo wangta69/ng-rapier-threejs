@@ -47,7 +47,6 @@ export class OrbitControl {
   private controls:OrbitControls; 
   constructor(camera: Camera, domeElement:HTMLElement) {
     this.controls = new OrbitControls(camera, domeElement);
-    
   }
 
   public setProps(props?: TcontrolProps) {
@@ -65,7 +64,4 @@ export class OrbitControl {
   public update() {
     this.controls.update()
   }
-
-
- 
 }

@@ -21,6 +21,8 @@ export class Body {
   public rigidBody!: RAPIER.RigidBody;
   public collider!: RAPIER.Collider;
   public useFrame!: {(argument:any): void;};
+
+  private activate = true;
   // private eventQueue: RAPIER.EventQueue;
 
   private onCollisionEnter!: (handle1?:number, handle2?: number) => void;
@@ -71,31 +73,38 @@ export class Body {
   }
 
   public remove() {
-    this.rapier.world.removeCollider(this.collider, true)
+    this.activate = false;
+    // this.rapier.world.removeCollider(this.collider, true);
+    this.rapier.world.removeRigidBody(this.rigidBody);
+
+    // this.rapier.world.removeRigidBody(this.rigidBody, true)
+    // 
   }
 
   public update(clock: ClockProps) {
-    if(this.object3d) {
-      this.object3d.position.copy(this.rigidBody.translation());
-      this.object3d.quaternion.copy(this.rigidBody.rotation());
-    }
-    if(typeof this.onCollisionEnter === 'function') {
-      // this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-      this.rapier.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-        if (started) {
-          this.onCollisionEnter(handle1, handle2);
-          // this.rapier.world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
-          //   const contactFid1 = manifold.contactFid1;
-          //   const contactFid2 = manifold.contactFid2;
-          //   this.onCollisionEnter();
-          // });
-        }
-      })
-    
-    }
-    
-    if(this.useFrame) {
-      this.useFrame(clock);
+    if(this.activate) {
+      if(this.object3d && this.rigidBody) {
+        this.object3d.position.copy(this.rigidBody.translation());
+        this.object3d.quaternion.copy(this.rigidBody.rotation());
+      }
+      if(typeof this.onCollisionEnter === 'function') {
+        // this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+        this.rapier.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+          if (started) {
+            this.onCollisionEnter(handle1, handle2);
+            // this.rapier.world.narrowPhase.contactPair(handle1, handle2, (manifold, flipped) => {
+            //   const contactFid1 = manifold.contactFid1;
+            //   const contactFid2 = manifold.contactFid2;
+            //   this.onCollisionEnter();
+            // });
+          }
+        })
+      
+      }
+      
+      if(this.useFrame) {
+        this.useFrame(clock);
+      }
     }
   }
   

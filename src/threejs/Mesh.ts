@@ -5,7 +5,7 @@ import {LoaderGLTF} from './addons/LoaderGLTF';
 import {LoaderObj} from './addons/LoaderObj';
 import {LoaderRGBE} from './addons/LoaderRGBE';
 import {Tcollider, Body} from '../rapier/Body';
-import {Tmaterial} from './Material';
+import {Imaterial} from './Material';
 import {World} from './World';
 export type MeshProp = {
   position?:number[] | Vector3,
@@ -18,7 +18,7 @@ export type MeshProp = {
 }
 export type Tmesh = {
   geometry: TgeometyrProps, // {type: 'box'}, // geometry 속성
-  material: Tmaterial, // {type: 'standard'}, // material 속성
+  material: Imaterial, // {type: 'standard'}, // material 속성
   mesh: MeshProp, // { castShadow: true}
   rapier?: Tcollider
 }

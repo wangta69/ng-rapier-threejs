@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as THREE from 'three';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
 import {MeshObj, Tmesh} from './Mesh';
 
 import {Renderer, RendererProps, IRendereProperty} from './lib/Renderer';
@@ -55,6 +57,8 @@ export class World {
   private screen = {width: 0, height: 0};
 
   public rapier!:Rapier;
+
+  public gui!:GUI;
   constructor(rapier: Rapier) { // rapier: Rapier
     this.rapier = rapier;
   }
@@ -70,6 +74,11 @@ export class World {
     return this;
   }
 
+  public enableGui() {
+    this.gui = new GUI();
+
+    return this;
+  }
   /**
    * 
    * @param helperProps 
@@ -163,6 +172,8 @@ export class World {
   // }
 
   public setLight(lightProp: LightProps, callback?:(light: LightObj)=>void) {  
+
+    console.log('setLight: ', lightProp);
     const lightObj = new LightObj(this).create(lightProp);
     if(lightProp.name) { //  외부에서 다시 호출가능하게 정의  this.world.lights[name]
       this.lights[lightProp.name] = lightObj;
@@ -324,4 +335,16 @@ export class World {
     }
     return this;
   }
+
+
+  // public gui() {
+  //   const gui = new GUI();
+  //   const physicsFolder = gui.addFolder('OrbitControls')
+  //   physicsFolder.add(this.controls, 'enableDamping');
+  //   physicsFolder.add(this.controls, 'dampingFactor', 0, 1, 0.01);
+  //   physicsFolder.add(this.controls, 'minDistance', 0, 10, 1);
+  //   physicsFolder.add(this.controls, 'maxDistance', 0, 1000, 1);
+  //   physicsFolder.add(this.controls, 'maxPolarAngle', 0, Math.PI, 0.1);
+  //   physicsFolder.add(this.controls, 'zoomSpeed', 0.1, 10, 0.1);
+  // }
 }
