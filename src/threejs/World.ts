@@ -61,6 +61,7 @@ export class World {
   public gui!:GUI;
   constructor(rapier: Rapier) { // rapier: Rapier
     this.rapier = rapier;
+    this.rapier.threeJsWorld = this;
   }
 
   public setContainer(container:HTMLElement) {
@@ -172,8 +173,6 @@ export class World {
   // }
 
   public setLight(lightProp: LightProps, callback?:(light: LightObj)=>void) {  
-
-    console.log('setLight: ', lightProp);
     const lightObj = new LightObj(this).create(lightProp);
     if(lightProp.name) { //  외부에서 다시 호출가능하게 정의  this.world.lights[name]
       this.lights[lightProp.name] = lightObj;

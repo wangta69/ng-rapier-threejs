@@ -3,7 +3,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
 
 import { World as  ThreeJsWorld, ClockProps} from '../threejs/World';
-import { Body} from './Body';
+import { Body, Tcollider} from './Body';
 import {RapierDebugRenderer} from './RapierDebugRenderer';
 // import {RigidBody} from './RigidBody';
 
@@ -23,7 +23,7 @@ export class Rapier {
    * @param args 
    */
   constructor() { // world: ThreeJsWorld
-    RAPIER.init(); // This line is only needed if using the compat version
+    // RAPIER.init(); // This line is only needed if using the compat version
   }
   /*
   public async initRapier(x: number = 0.0, y: number = -9.81, z: number = 0.0):Promise<Rapier> { // Promise<Rapier> 
@@ -44,11 +44,15 @@ export class Rapier {
   } */
 
   public async init(gravity: number[] = [0.0, -9.81, 0.0]) {
+    await RAPIER.init(); // This line is only needed if using the compat version
+    console.log('Rapier.. init >> gravity:', gravity)
     this.removeAll();
-    this.world = new RAPIER.World( new RAPIER.Vector3(gravity[0], gravity[1], gravity[2]));
+    console.log('before this.world:', new RAPIER.Vector3(...(gravity as [number, number, number])));
+    this.world = await new RAPIER.World( new RAPIER.Vector3(...(gravity as [number, number, number])));
+    console.log('after this.world:', this.world);
     this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
-    this.eventQueue = new RAPIER.EventQueue(true);
-    return this;
+    this.eventQueue = await new RAPIER.EventQueue(true);
+    return this.threeJsWorld;
   }
   
   public enableRapierDebugRenderer() {
@@ -84,7 +88,8 @@ export class Rapier {
    * @param props 
    * @returns 
    */
-  public async createBody(props: any) {
+  public async createBody(props: Tcollider) {
+    console.log('createBody: this >', this )
     const bodyObj = new Body(this);
     await bodyObj.create(props);
     return bodyObj;
