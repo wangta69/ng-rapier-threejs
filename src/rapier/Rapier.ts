@@ -45,11 +45,8 @@ export class Rapier {
 
   public async init(gravity: number[] = [0.0, -9.81, 0.0]) {
     await RAPIER.init(); // This line is only needed if using the compat version
-    console.log('Rapier.. init >> gravity:', gravity)
     this.removeAll();
-    console.log('before this.world:', new RAPIER.Vector3(...(gravity as [number, number, number])));
     this.world = await new RAPIER.World( new RAPIER.Vector3(...(gravity as [number, number, number])));
-    console.log('after this.world:', this.world);
     this.threeJsWorld.updates.push((clock:any)=>{this.update(clock)});
     this.eventQueue = await new RAPIER.EventQueue(true);
     return this.threeJsWorld;
@@ -89,7 +86,6 @@ export class Rapier {
    * @returns 
    */
   public async createBody(props: Tcollider) {
-    console.log('createBody: this >', this )
     const bodyObj = new Body(this);
     await bodyObj.create(props);
     return bodyObj;

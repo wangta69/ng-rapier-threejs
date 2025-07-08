@@ -28,7 +28,6 @@ export class Body {
   private onCollisionEnter!: (handle1?:number, handle2?: number) => void;
   // private collisionEvent!: CustomEvent;
   constructor(rapier: Rapier) {
-    console.log('Body.ts, construct: rapier:', rapier);
     this.rapier = rapier;
   }
 
